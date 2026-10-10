@@ -4,7 +4,7 @@ project(tetris)
 find_package(SDL3 REQUIRED CONFIG REQUIRED COMPONENTS SDL3-shared)
 find_package(SDL3_ttf REQUIRED CONFIG)
 
-add_executable(tetris main.c)
+add_executable(tetris main.c tetris.c render.c input.c)
 
 target_link_libraries(tetris PRIVATE
     SDL3::SDL3
