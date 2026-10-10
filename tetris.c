@@ -1,31 +1,16 @@
 #include "tetris.h"
 
-Uint16 LevelToMSPT(Uint8 level);
-void SetBlockState(TetrisContext *context, int i, int j, BlockState state);
-void SetBlockColor(TetrisContext *context, int i, int j, BlockColor color);
 bool IsEmpty(TetrisContext *context, int i, int j);
 void SetBlock(TetrisContext *context, int i, int j, Block block);
-void IncrementScore(TetrisContext *context, int d);
+void SetBlockState(TetrisContext *context, int i, int j, BlockState state);
+void SetBlockColor(TetrisContext *context, int i, int j, BlockColor color);
 bool IsMoving(TetrisContext *context);
 bool PopNextTetromino(TetrisContext *context);
 int GetRowsToClear(TetrisContext *context, int i);
 void ClearRows(TetrisContext *context, int i, int n);
+Uint16 LevelToMSPT(Uint8 level);
+void IncrementScore(TetrisContext *context, int d);
 void UpdateBoard(TetrisContext *context);
-
-Uint16 LevelToMSPT(Uint8 level)
-{
-    return SDL_max(1000 - (level * 100), MSPT_MIN);
-}
-
-void SetBlockState(TetrisContext *context, int i, int j, BlockState state)
-{
-    context->board[i][j].state = state;
-}
-
-void SetBlockColor(TetrisContext *context, int i, int j, BlockColor color)
-{
-    context->board[i][j].color = color;
-}
 
 void InitTetrisContext(TetrisContext *context, Uint8 level, Uint8 randblocks)
 {
@@ -76,6 +61,199 @@ void UpdateGamePlay(TetrisContext *context)
     }
 }
 
+void MoveDown(TetrisContext *context)
+{
+    int i, j;
+    bool fix;
+    fix = false;
+    for (i = BOARD_ROWS-1; i >= 0; --i) {
+        for (j = 0; j < BOARD_COLS; ++j) {
+            if (context->board[i][j].state == BLOCK_MOVING) {
+                if (i == BOARD_ROWS-1 || context->board[i+1][j].state == BLOCK_FIXED) {
+                    fix = true;
+                }
+            }
+        }
+    }
+    if (fix) {
+        for (i = BOARD_ROWS-1; i >= 0; --i) {
+            for (j = 0; j < BOARD_COLS; ++j) {
+                if (context->board[i][j].state == BLOCK_MOVING) {
+                    SetBlockState(context, i, j, BLOCK_FIXED);
+                }
+            }
+        }
+        IncrementScore(context, SCORE_PER_FIX);
+    } else {
+        for (i = BOARD_ROWS - 1; i >= 0; --i) {
+            for (j = 0; j < BOARD_COLS; ++j) {
+                if (context->board[i][j].state == BLOCK_MOVING) {
+                    SetBlock(context, i+1, j, context->board[i][j]);
+                    SetBlockState(context, i, j, BLOCK_EMPTY);
+                }
+            }
+        }
+    }
+}
+
+void MoveLeft(TetrisContext *context)
+{
+    int i, j;
+    for (i = 0; i < BOARD_ROWS; ++i) {
+        for (j = 0; j < BOARD_COLS; ++j) {
+            if (context->board[i][j].state == BLOCK_MOVING) {
+                if (j == 0 || context->board[i][j-1].state == BLOCK_FIXED) {
+                    return;
+                }
+            }
+        }
+    }
+    for (i = 0; i < BOARD_ROWS; ++i) {
+        for (j = 0; j < BOARD_COLS; ++j) {
+            if (context->board[i][j].state == BLOCK_MOVING) {
+                SetBlock(context, i, j-1, context->board[i][j]);
+                SetBlockState(context, i, j, BLOCK_EMPTY);
+            }
+        }
+    }
+}
+
+void MoveRight(TetrisContext *context)
+{
+    int i, j;
+    for (i = 0; i < BOARD_ROWS; ++i) {
+        for (j = BOARD_COLS - 1; j >= 0; --j) {
+            if (context->board[i][j].state == BLOCK_MOVING) {
+                if (j == BOARD_COLS - 1 || context->board[i][j+1].state == BLOCK_FIXED) {
+                    return;
+                }
+            }
+        }
+    }
+    for (i = 0; i < BOARD_ROWS; ++i) {
+        for (j = BOARD_COLS - 1; j >= 0; --j) {
+            if (context->board[i][j].state == BLOCK_MOVING) {
+                SetBlock(context, i, j+1, context->board[i][j]);
+                SetBlockState(context, i, j, BLOCK_EMPTY);
+            }
+        }
+    }
+}
+
+// TODO This is too complex and simplified, but first rethink the board data structure
+// TODO implement wall kick
+void Rotate(TetrisContext *context)
+{
+    int x_min = BOARD_COLS;
+    int x_max = -1;
+    int y_min = BOARD_ROWS;
+    int y_max = -1;
+
+    int i, j;
+
+    for (i = 0; i < BOARD_ROWS; ++i) {
+        for (j = 0; j < BOARD_COLS; ++j) {
+            if (context->board[i][j].state == BLOCK_MOVING) {
+                x_min = SDL_min(x_min, j);
+                x_max = SDL_max(x_max, j);
+                y_min = SDL_min(y_min, i);
+                y_max = SDL_max(y_max, i);
+            }
+        }
+    }
+
+    if (x_max == -1) {
+        return;
+    }
+
+    int x_axis = (x_min + x_max) / 2;
+    int y_axis = (y_min + y_max) / 2;
+
+    int new_rows[4];
+    int new_cols[4];
+    int count = 0;
+
+    for (i = 0; i < BOARD_ROWS; ++i) {
+        for (j = 0; j < BOARD_COLS; ++j) {
+            if (context->board[i][j].state == BLOCK_MOVING) {
+                int dx = j - x_axis;
+                int dy = i - y_axis;
+
+                /*
+                 * 90-degree clockwise rotation in screen
+                 * coordinates:
+                 *
+                 *     (dx, dy) -> (-dy, dx)
+                 */
+                int new_col = x_axis - dy;
+                int new_row = y_axis + dx;
+
+                if (new_row < 0 || new_row >= BOARD_ROWS ||
+                    new_col < 0 || new_col >= BOARD_COLS) {
+                    return;
+                }
+
+                if (context->board[new_row][new_col].state == BLOCK_FIXED) {
+                    return;
+                }
+
+                new_rows[count] = new_row;
+                new_cols[count] = new_col;
+                ++count;
+            }
+        }
+    }
+
+    BlockColor color;
+
+    for (i = 0; i < BOARD_ROWS; ++i) {
+        for (j = 0; j < BOARD_COLS; ++j) {
+            if (context->board[i][j].state == BLOCK_MOVING) {
+                color = context->board[i][j].color;
+                SetBlockState(context, i, j, BLOCK_EMPTY);
+            }
+        }
+    }
+
+    for (i = 0; i < count; ++i) {
+        SetBlockState(context, new_rows[i], new_cols[i], BLOCK_MOVING);
+        SetBlockColor(context, new_rows[i], new_cols[i], color);
+    }
+}
+
+void TogglePause(TetrisContext *context)
+{
+    context->paused = !context->paused;
+}
+
+void IncrementRandBlocks(TetrisContext *context)
+{
+    if (context->randblocks < RANDBLOCKS_MAX) {
+        context->randblocks++;
+    }
+}
+
+void DecrementRandBlocks(TetrisContext *context)
+{
+    if (context->randblocks > RANDBLOCKS_MIN) {
+        context->randblocks--;
+    }
+}
+
+void IncrementLevel(TetrisContext *context)
+{
+    if (context->level < LEVEL_MAX) {
+        context->level++;
+    }
+}
+
+void DecrementLevel(TetrisContext *context)
+{
+    if (context->level > LEVEL_MIN) {
+        context->level--;
+    }
+}
+
 bool IsEmpty(TetrisContext *context, int i, int j)
 {
     return context->board[i][j].state == BLOCK_EMPTY;
@@ -87,13 +265,14 @@ void SetBlock(TetrisContext *context, int i, int j, Block block)
     SetBlockColor(context, i, j, block.color);
 }
 
-void IncrementScore(TetrisContext *context, int d)
+void SetBlockState(TetrisContext *context, int i, int j, BlockState state)
 {
-    context->score += d;
-    if (context->score >= SCORE_PER_LEVEL * context->level) {
-        context->level = SDL_min(LEVEL_MAX, context->level+1);
-        context->mspt = LevelToMSPT(context->level);
-    }
+    context->board[i][j].state = state;
+}
+
+void SetBlockColor(TetrisContext *context, int i, int j, BlockColor color)
+{
+    context->board[i][j].color = color;
 }
 
 bool IsMoving(TetrisContext *context)
@@ -223,41 +402,6 @@ bool PopNextTetromino(TetrisContext *context)
     return true;
 }
 
-void MoveDown(TetrisContext *context)
-{
-    int i, j;
-    bool fix;
-    fix = false;
-    for (i = BOARD_ROWS-1; i >= 0; --i) {
-        for (j = 0; j < BOARD_COLS; ++j) {
-            if (context->board[i][j].state == BLOCK_MOVING) {
-                if (i == BOARD_ROWS-1 || context->board[i+1][j].state == BLOCK_FIXED) {
-                    fix = true;
-                }
-            }
-        }
-    }
-    if (fix) {
-        for (i = BOARD_ROWS-1; i >= 0; --i) {
-            for (j = 0; j < BOARD_COLS; ++j) {
-                if (context->board[i][j].state == BLOCK_MOVING) {
-                    SetBlockState(context, i, j, BLOCK_FIXED);
-                }
-            }
-        }
-        IncrementScore(context, SCORE_PER_FIX);
-    } else {
-        for (i = BOARD_ROWS - 1; i >= 0; --i) {
-            for (j = 0; j < BOARD_COLS; ++j) {
-                if (context->board[i][j].state == BLOCK_MOVING) {
-                    SetBlock(context, i+1, j, context->board[i][j]);
-                    SetBlockState(context, i, j, BLOCK_EMPTY);
-                }
-            }
-        }
-    }
-}
-
 int GetRowsToClear(TetrisContext *context, int i)
 {
     int j;
@@ -283,6 +427,20 @@ void ClearRows(TetrisContext *context, int i, int n)
     }
 }
 
+Uint16 LevelToMSPT(Uint8 level)
+{
+    return SDL_max(1000 - (level * 100), MSPT_MIN);
+}
+
+void IncrementScore(TetrisContext *context, int d)
+{
+    context->score += d;
+    if (context->score >= SCORE_PER_LEVEL * context->level) {
+        context->level = SDL_min(LEVEL_MAX, context->level+1);
+        context->mspt = LevelToMSPT(context->level);
+    }
+}
+
 void UpdateBoard(TetrisContext *context)
 {
     int i, n;
@@ -290,163 +448,5 @@ void UpdateBoard(TetrisContext *context)
         n = GetRowsToClear(context, i);
         ClearRows(context, i, n);
         IncrementScore(context, SCORE_PER_ROW * n);
-    }
-}
-
-void TogglePause(TetrisContext *context)
-{
-    context->paused = !context->paused;
-}
-
-void MoveLeft(TetrisContext *context)
-{
-    int i, j;
-    for (i = 0; i < BOARD_ROWS; ++i) {
-        for (j = 0; j < BOARD_COLS; ++j) {
-            if (context->board[i][j].state == BLOCK_MOVING) {
-                if (j == 0 || context->board[i][j-1].state == BLOCK_FIXED) {
-                    return;
-                }
-            }
-        }
-    }
-    for (i = 0; i < BOARD_ROWS; ++i) {
-        for (j = 0; j < BOARD_COLS; ++j) {
-            if (context->board[i][j].state == BLOCK_MOVING) {
-                SetBlock(context, i, j-1, context->board[i][j]);
-                SetBlockState(context, i, j, BLOCK_EMPTY);
-            }
-        }
-    }
-}
-
-void MoveRight(TetrisContext *context)
-{
-    int i, j;
-    for (i = 0; i < BOARD_ROWS; ++i) {
-        for (j = BOARD_COLS - 1; j >= 0; --j) {
-            if (context->board[i][j].state == BLOCK_MOVING) {
-                if (j == BOARD_COLS - 1 || context->board[i][j+1].state == BLOCK_FIXED) {
-                    return;
-                }
-            }
-        }
-    }
-    for (i = 0; i < BOARD_ROWS; ++i) {
-        for (j = BOARD_COLS - 1; j >= 0; --j) {
-            if (context->board[i][j].state == BLOCK_MOVING) {
-                SetBlock(context, i, j+1, context->board[i][j]);
-                SetBlockState(context, i, j, BLOCK_EMPTY);
-            }
-        }
-    }
-}
-
-// TODO This is too complex and simplified, but first rethink the board data structure
-// TODO implement wall kick
-void Rotate(TetrisContext *context)
-{
-    int x_min = BOARD_COLS;
-    int x_max = -1;
-    int y_min = BOARD_ROWS;
-    int y_max = -1;
-
-    int i, j;
-
-    for (i = 0; i < BOARD_ROWS; ++i) {
-        for (j = 0; j < BOARD_COLS; ++j) {
-            if (context->board[i][j].state == BLOCK_MOVING) {
-                x_min = SDL_min(x_min, j);
-                x_max = SDL_max(x_max, j);
-                y_min = SDL_min(y_min, i);
-                y_max = SDL_max(y_max, i);
-            }
-        }
-    }
-
-    if (x_max == -1) {
-        return;
-    }
-
-    int x_axis = (x_min + x_max) / 2;
-    int y_axis = (y_min + y_max) / 2;
-
-    int new_rows[4];
-    int new_cols[4];
-    int count = 0;
-
-    for (i = 0; i < BOARD_ROWS; ++i) {
-        for (j = 0; j < BOARD_COLS; ++j) {
-            if (context->board[i][j].state == BLOCK_MOVING) {
-                int dx = j - x_axis;
-                int dy = i - y_axis;
-
-                /*
-                 * 90-degree clockwise rotation in screen
-                 * coordinates:
-                 *
-                 *     (dx, dy) -> (-dy, dx)
-                 */
-                int new_col = x_axis - dy;
-                int new_row = y_axis + dx;
-
-                if (new_row < 0 || new_row >= BOARD_ROWS ||
-                    new_col < 0 || new_col >= BOARD_COLS) {
-                    return;
-                }
-
-                if (context->board[new_row][new_col].state == BLOCK_FIXED) {
-                    return;
-                }
-
-                new_rows[count] = new_row;
-                new_cols[count] = new_col;
-                ++count;
-            }
-        }
-    }
-
-    BlockColor color;
-
-    for (i = 0; i < BOARD_ROWS; ++i) {
-        for (j = 0; j < BOARD_COLS; ++j) {
-            if (context->board[i][j].state == BLOCK_MOVING) {
-                color = context->board[i][j].color;
-                SetBlockState(context, i, j, BLOCK_EMPTY);
-            }
-        }
-    }
-
-    for (i = 0; i < count; ++i) {
-        SetBlockState(context, new_rows[i], new_cols[i], BLOCK_MOVING);
-        SetBlockColor(context, new_rows[i], new_cols[i], color);
-    }
-}
-
-void IncrementRandBlocks(TetrisContext *context)
-{
-    if (context->randblocks < RANDBLOCKS_MAX) {
-        context->randblocks++;
-    }
-}
-
-void DecrementRandBlocks(TetrisContext *context)
-{
-    if (context->randblocks > RANDBLOCKS_MIN) {
-        context->randblocks--;
-    }
-}
-
-void IncrementLevel(TetrisContext *context)
-{
-    if (context->level < LEVEL_MAX) {
-        context->level++;
-    }
-}
-
-void DecrementLevel(TetrisContext *context)
-{
-    if (context->level > LEVEL_MIN) {
-        context->level--;
     }
 }
