@@ -101,7 +101,7 @@ void DrawNextTetromino(RenderContext *renderContext, TetrominoType next, int x, 
     r = 1, c = 2;
     for (i = 0; i < NO_BLOCKS_PER_TETROMINO; ++i) {
         tetromino.coordinates[i].row += r;
-        tetromino.coordinates[i].col += r;
+        tetromino.coordinates[i].col += c;
     }
     for (i = 0; i < NO_BLOCKS_PER_TETROMINO; ++i) {
         DrawBlock(
