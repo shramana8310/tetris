@@ -18,7 +18,7 @@
 #define PADDING_WIDTH 30
 #define PADDING_HEIGHT 30
 
-typedef struct RenderContext {
+typedef struct {
     SDL_Renderer *renderer;
     TTF_Font *font;
 } RenderContext;

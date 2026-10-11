@@ -1,4 +1,5 @@
 #include "render.h"
+#include "tetris.h"
 
 SDL_FColor ColorFromBlockColor(BlockColor color)
 {
@@ -92,56 +93,21 @@ void DrawBlock(RenderContext *renderContext, int i, int j, int x, int y, BlockCo
     SDL_RenderFillRect(renderContext->renderer, &rect);
 }
 
-void DrawNextTetromino(RenderContext *renderContext, Tetromino next, int x, int y)
+void DrawNextTetromino(RenderContext *renderContext, TetrominoType next, int x, int y)
 {
-    int i = 1, j = 2;
-    // TODO define a function that maps each tetromino to coordinates and block color
-    switch (next) {
-        case TETROMINO_I:
-            DrawBlock(renderContext, i, j, x, y, BLOCK_CYAN);
-            DrawBlock(renderContext, i+1, j, x, y, BLOCK_CYAN);
-            DrawBlock(renderContext, i+2, j, x, y, BLOCK_CYAN);
-            DrawBlock(renderContext, i+3, j, x, y, BLOCK_CYAN);
-            break;
-        case TETROMINO_O:
-            DrawBlock(renderContext, i, j-1, x, y, BLOCK_YELLOW);
-            DrawBlock(renderContext, i, j, x, y, BLOCK_YELLOW);
-            DrawBlock(renderContext, i+1, j-1, x, y, BLOCK_YELLOW);
-            DrawBlock(renderContext, i+1, j, x, y, BLOCK_YELLOW);
-            break;
-        case TETROMINO_T:
-            DrawBlock(renderContext, i, j-1, x, y, BLOCK_PURPLE);
-            DrawBlock(renderContext, i, j, x, y, BLOCK_PURPLE);
-            DrawBlock(renderContext, i, j+1, x, y, BLOCK_PURPLE);
-            DrawBlock(renderContext, i+1, j, x, y, BLOCK_PURPLE);
-            break;
-        case TETROMINO_L:
-            DrawBlock(renderContext, i, j-1, x, y, BLOCK_ORANGE);
-            DrawBlock(renderContext, i+1, j-1, x, y, BLOCK_ORANGE);
-            DrawBlock(renderContext, i+2, j-1, x, y, BLOCK_ORANGE);
-            DrawBlock(renderContext, i+2, j, x, y, BLOCK_ORANGE);
-            break;
-        case TETROMINO_J:
-            DrawBlock(renderContext, i, j, x, y, BLOCK_BLUE);
-            DrawBlock(renderContext, i+1, j, x, y, BLOCK_BLUE);
-            DrawBlock(renderContext, i+2, j, x, y, BLOCK_BLUE);
-            DrawBlock(renderContext, i+2, j-1, x, y, BLOCK_BLUE);
-            break;
-        case TETROMINO_S:
-            DrawBlock(renderContext, i, j, x, y, BLOCK_GREEN);
-            DrawBlock(renderContext, i, j+1, x, y, BLOCK_GREEN);
-            DrawBlock(renderContext, i+1, j-1, x, y, BLOCK_GREEN);
-            DrawBlock(renderContext, i+1, j, x, y, BLOCK_GREEN);
-            break;
-        case TETROMINO_Z:
-            DrawBlock(renderContext, i, j-1, x, y, BLOCK_RED);
-            DrawBlock(renderContext, i, j, x, y, BLOCK_RED);
-            DrawBlock(renderContext, i+1, j, x, y, BLOCK_RED);
-            DrawBlock(renderContext, i+1, j+1, x, y, BLOCK_RED);
-            break;
-        case TETROMINO_COUNT:
-        default:
-            break;
+    int i, r, c;
+    Coordinate coordinate;
+    Tetromino tetromino;
+    // TODO adjust r c appropriately
+    r = 1, c = 2;
+    tetromino = CreateTetrominoByType(next);
+    for (i = 0; i < NO_BLOCKS_PER_TETROMINO; ++i) {
+        tetromino.coordinates[i].row += r;
+        tetromino.coordinates[i].col += c;
+    }
+    for (i = 0; i < NO_BLOCKS_PER_TETROMINO; ++i) {
+        coordinate = tetromino.coordinates[i];
+        DrawBlock(renderContext, coordinate.row, coordinate.col, x, y, tetromino.color);
     }
 }
 

@@ -254,6 +254,94 @@ void DecrementLevel(TetrisContext *context)
     }
 }
 
+Tetromino CreateTetrominoByType(TetrominoType tetrominoType)
+{
+    Tetromino tetromino;
+    switch (tetrominoType) {
+        case TETROMINO_I:
+            tetromino.coordinates[0].row = 0;
+            tetromino.coordinates[0].col = 0;
+            tetromino.coordinates[1].row = 1;
+            tetromino.coordinates[1].col = 0;
+            tetromino.coordinates[2].row = 2;
+            tetromino.coordinates[2].col = 0;
+            tetromino.coordinates[3].row = 3;
+            tetromino.coordinates[3].col = 0;
+            tetromino.color = BLOCK_CYAN;
+            break;
+        case TETROMINO_O:
+            tetromino.coordinates[0].row = 0;
+            tetromino.coordinates[0].col = 0;
+            tetromino.coordinates[1].row = 0;
+            tetromino.coordinates[1].col = 1;
+            tetromino.coordinates[2].row = 1;
+            tetromino.coordinates[2].col = 0;
+            tetromino.coordinates[3].row = 1;
+            tetromino.coordinates[3].col = 1;
+            tetromino.color = BLOCK_YELLOW;
+            break;
+        case TETROMINO_T:
+            tetromino.coordinates[0].row = 0;
+            tetromino.coordinates[0].col = 0;
+            tetromino.coordinates[1].row = 0;
+            tetromino.coordinates[1].col = 1;
+            tetromino.coordinates[2].row = 0;
+            tetromino.coordinates[2].col = 2;
+            tetromino.coordinates[3].row = 1;
+            tetromino.coordinates[3].col = 1;
+            tetromino.color = BLOCK_PURPLE;
+            break;
+        case TETROMINO_L:
+            tetromino.coordinates[0].row = 0;
+            tetromino.coordinates[0].col = 0;
+            tetromino.coordinates[1].row = 1;
+            tetromino.coordinates[1].col = 0;
+            tetromino.coordinates[2].row = 2;
+            tetromino.coordinates[2].col = 0;
+            tetromino.coordinates[3].row = 2;
+            tetromino.coordinates[3].col = 1;
+            tetromino.color = BLOCK_ORANGE;
+            break;
+        case TETROMINO_J:
+            tetromino.coordinates[0].row = 0;
+            tetromino.coordinates[0].col = 1;
+            tetromino.coordinates[1].row = 1;
+            tetromino.coordinates[1].col = 1;
+            tetromino.coordinates[2].row = 2;
+            tetromino.coordinates[2].col = 1;
+            tetromino.coordinates[3].row = 2;
+            tetromino.coordinates[3].col = 0;
+            tetromino.color = BLOCK_BLUE;
+            break;
+        case TETROMINO_S:
+            tetromino.coordinates[0].row = 0;
+            tetromino.coordinates[0].col = 1;
+            tetromino.coordinates[1].row = 0;
+            tetromino.coordinates[1].col = 2;
+            tetromino.coordinates[2].row = 1;
+            tetromino.coordinates[2].col = 0;
+            tetromino.coordinates[3].row = 1;
+            tetromino.coordinates[3].col = 1;
+            tetromino.color = BLOCK_GREEN;
+            break;
+        case TETROMINO_Z:
+            tetromino.coordinates[0].row = 0;
+            tetromino.coordinates[0].col = 0;
+            tetromino.coordinates[1].row = 0;
+            tetromino.coordinates[1].col = 1;
+            tetromino.coordinates[2].row = 1;
+            tetromino.coordinates[2].col = 1;
+            tetromino.coordinates[3].row = 1;
+            tetromino.coordinates[3].col = 2;
+            tetromino.color = BLOCK_RED;
+            break;
+        case TETROMINO_COUNT:
+        default:
+            break;
+    }
+    return tetromino;
+}
+
 bool IsEmpty(TetrisContext *context, int i, int j)
 {
     return context->board[i][j].state == BLOCK_EMPTY;
@@ -290,113 +378,29 @@ bool IsMoving(TetrisContext *context)
 
 bool PopNextTetromino(TetrisContext *context)
 {
-    int i, j;
-    i = 0;
-    j = BOARD_COLS / 2;
+    int i, r, c;
     Block block;
-    // TODO maybe we should create a function to map each tetromino to indices
-    switch (context->next) {
-        case TETROMINO_I:
-            if (!(IsEmpty(context, i, j) && 
-                  IsEmpty(context, i+1, j) && 
-                  IsEmpty(context, i+2, j) && 
-                  IsEmpty(context, i+3, j))) {
-                return false;
-            }
-            block.state = BLOCK_MOVING;
-            block.color = BLOCK_CYAN;
-            SetBlock(context, i, j, block);
-            SetBlock(context, i+1, j, block);
-            SetBlock(context, i+2, j, block);
-            SetBlock(context, i+3, j, block);
-            break;
-        case TETROMINO_O:
-            if (!(IsEmpty(context, i, j-1) && 
-                  IsEmpty(context, i, j) && 
-                  IsEmpty(context, i+1, j-1) && 
-                  IsEmpty(context, i+1, j))) {
-                return false;
-            }
-            block.state = BLOCK_MOVING;
-            block.color = BLOCK_YELLOW;
-            SetBlock(context, i, j-1, block);
-            SetBlock(context, i, j, block);
-            SetBlock(context, i+1, j-1, block);
-            SetBlock(context, i+1, j, block);
-            break;
-        case TETROMINO_T:
-            if (!(IsEmpty(context, i, j-1) && 
-                  IsEmpty(context, i, j) && 
-                  IsEmpty(context, i, j+1) && 
-                  IsEmpty(context, i+1, j))) {
-                return false;
-            }
-            block.state = BLOCK_MOVING;
-            block.color = BLOCK_PURPLE;
-            SetBlock(context, i, j-1, block);
-            SetBlock(context, i, j, block);
-            SetBlock(context, i, j+1, block);
-            SetBlock(context, i+1, j, block);
-            break;
-        case TETROMINO_L:
-            if (!(IsEmpty(context, i, j-1) && 
-                  IsEmpty(context, i+1, j-1) && 
-                  IsEmpty(context, i+2, j-1) && 
-                  IsEmpty(context, i+2, j))) {
-                return false;
-            }
-            block.state = BLOCK_MOVING;
-            block.color = BLOCK_ORANGE;
-            SetBlock(context, i, j-1, block);
-            SetBlock(context, i+1, j-1, block);
-            SetBlock(context, i+2, j-1, block);
-            SetBlock(context, i+2, j, block);
-            break;
-        case TETROMINO_J:
-            if (!(IsEmpty(context, i, j) && 
-                  IsEmpty(context, i+1, j) && 
-                  IsEmpty(context, i+2, j) && 
-                  IsEmpty(context, i+2, j-1))) {
-                return false;
-            }
-            block.state = BLOCK_MOVING;
-            block.color = BLOCK_BLUE;
-            SetBlock(context, i, j, block);
-            SetBlock(context, i+1, j, block);
-            SetBlock(context, i+2, j, block);
-            SetBlock(context, i+2, j-1, block);
-            break;
-        case TETROMINO_S:
-            if (!(IsEmpty(context, i, j) && 
-                  IsEmpty(context, i, j+1) && 
-                  IsEmpty(context, i+1, j-1) && 
-                  IsEmpty(context, i+1, j))) {
-                return false;
-            }
-            block.state = BLOCK_MOVING;
-            block.color = BLOCK_GREEN;
-            SetBlock(context, i, j, block);
-            SetBlock(context, i, j+1, block);
-            SetBlock(context, i+1, j-1, block);
-            SetBlock(context, i+1, j, block);
-            break;
-        case TETROMINO_Z:
-            if (!(IsEmpty(context, i, j-1) && 
-                  IsEmpty(context, i, j) && 
-                  IsEmpty(context, i+1, j) && 
-                  IsEmpty(context, i+1, j+1))) {
-                return false;
-            }
-            block.state = BLOCK_MOVING;
-            block.color = BLOCK_RED;
-            SetBlock(context, i, j-1, block);
-            SetBlock(context, i, j, block);
-            SetBlock(context, i+1, j, block);
-            SetBlock(context, i+1, j+1, block);
-            break;
-        case TETROMINO_COUNT:
-        default:
-            break;
+    Coordinate coordinate;
+    Tetromino tetromino;
+    r = 0;
+    c = (BOARD_COLS - 1) / 2;
+    tetromino = CreateTetrominoByType(context->next);
+    for (i = 0; i < NO_BLOCKS_PER_TETROMINO; ++i) {
+        tetromino.coordinates[i].row += r;
+        tetromino.coordinates[i].col += c;
+    }
+    // TODO scan empty blocks leniently
+    for (i = 0; i < NO_BLOCKS_PER_TETROMINO; ++i) {
+        coordinate = tetromino.coordinates[i];
+        if (!IsEmpty(context, coordinate.row, coordinate.col)) {
+            return false;
+        }
+    }
+    for (i = 0; i < NO_BLOCKS_PER_TETROMINO; ++i) {
+        coordinate = tetromino.coordinates[i];
+        block.color = tetromino.color;
+        block.state = BLOCK_MOVING;
+        SetBlock(context, coordinate.row, coordinate.col, block);
     }
     context->next = SDL_rand(TETROMINO_COUNT);
     return true;

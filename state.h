@@ -7,7 +7,7 @@ typedef enum {
     MODE_GAMEPLAY,
 } GameMode;
 
-typedef struct GameState {
+typedef struct {
     TetrisContext *tetrisContext;
     RenderContext *renderContext;
     GameMode mode;

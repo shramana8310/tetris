@@ -4,6 +4,8 @@
 #define BOARD_COLS 10
 #define BOARD_ROWS 20
 
+#define NO_BLOCKS_PER_TETROMINO 4
+
 #define SCORE_PER_ROW 100
 #define SCORE_PER_FIX 10
 #define SCORE_PER_LEVEL 1000
@@ -25,7 +27,7 @@ typedef enum {
     TETROMINO_S,
     TETROMINO_Z,
     TETROMINO_COUNT,
-} Tetromino;
+} TetrominoType;
 
 typedef enum {
     BLOCK_CYAN,
@@ -45,15 +47,25 @@ typedef enum {
     BLOCK_FIXED,
 } BlockState;
 
-typedef struct Block {
+typedef struct {
     BlockState state;
     BlockColor color;
 } Block;
 
+typedef struct {
+    int row;
+    int col;
+} Coordinate;
+
+typedef struct {
+    Coordinate coordinates[NO_BLOCKS_PER_TETROMINO];
+    BlockColor color;
+} Tetromino;
+
 // TODO MAJOR REFACTORING Let's rethink how we represent the board and the current tetromino
-typedef struct TetrisContext {
+typedef struct {
     Block board[BOARD_ROWS][BOARD_COLS];
-    Tetromino next;
+    TetrominoType next;
     Uint64 lasttick;
     Uint8 level;
     Uint8 randblocks;
@@ -74,3 +86,4 @@ void IncrementRandBlocks(TetrisContext *context);
 void DecrementRandBlocks(TetrisContext *context);
 void IncrementLevel(TetrisContext *context);
 void DecrementLevel(TetrisContext *context);
+Tetromino CreateTetrominoByType(TetrominoType tetrominoType);
