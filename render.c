@@ -95,23 +95,26 @@ void DrawBlock(RenderContext *renderContext, int i, int j, int x, int y, BlockCo
 
 void DrawNextTetromino(RenderContext *renderContext, TetrominoType next, int x, int y)
 {
-    int i, r, c;
-    Coordinate coordinate;
-    Tetromino tetromino;
-    // TODO adjust r c appropriately
+    int i;
+    Tetromino tetromino = CreateTetrominoByType(next);
+    int r, c;
     r = 1, c = 2;
-    tetromino = CreateTetrominoByType(next);
     for (i = 0; i < NO_BLOCKS_PER_TETROMINO; ++i) {
         tetromino.coordinates[i].row += r;
-        tetromino.coordinates[i].col += c;
+        tetromino.coordinates[i].col += r;
     }
     for (i = 0; i < NO_BLOCKS_PER_TETROMINO; ++i) {
-        coordinate = tetromino.coordinates[i];
-        DrawBlock(renderContext, coordinate.row, coordinate.col, x, y, tetromino.color);
+        DrawBlock(
+            renderContext, 
+            tetromino.coordinates[i].row,
+            tetromino.coordinates[i].col,
+            x, 
+            y, 
+            tetromino.color
+        );
     }
 }
 
-// TODO caching
 void DrawText(RenderContext *renderContext, const char *text, float x, float y)
 {
     SDL_Color color = { 255, 255, 255, 255 };
@@ -152,7 +155,7 @@ void DrawGameOver(RenderContext *renderContext)
     DrawText(
         renderContext, 
         "GAME OVER", 
-        PADDING_WIDTH + BOARD_WALL_WIDTH + 100.0f, 
+        PADDING_WIDTH + BOARD_WALL_WIDTH + 80.0f, 
         PADDING_HEIGHT + (BLOCK_HEIGHT * 4) + 23.0f
     );
 }
@@ -177,10 +180,18 @@ void DrawBoard(RenderContext *renderContext, TetrisContext *tetrisContext)
     // main board
     for (i = 0; i < BOARD_ROWS; ++i) {
         for (j = 0; j < BOARD_COLS; ++j) {
-            if (tetrisContext->board[i][j].state == BLOCK_EMPTY) {
+            if (tetrisContext->board[i][j] == BLOCK_NONE) {
                 continue;
             }
-            DrawBlock(renderContext, i, j, x_offset, y_offset, tetrisContext->board[i][j].color);
+            DrawBlock(renderContext, i, j, x_offset, y_offset, tetrisContext->board[i][j]);
+        }
+    }
+    // current tetromino
+    if (tetrisContext->moving) {
+        Coordinate coordinate;
+        for (i = 0; i < NO_BLOCKS_PER_TETROMINO; ++i) {
+            coordinate = tetrisContext->current.coordinates[i];
+            DrawBlock(renderContext, coordinate.row, coordinate.col, x_offset, y_offset, tetrisContext->current.color);
         }
     }
     // next tetromino
@@ -204,7 +215,7 @@ void DrawBoard(RenderContext *renderContext, TetrisContext *tetrisContext)
     if (tetrisContext->paused) {
         DrawText(renderContext, "PAUSED", x_offset, info_y + 60);
     }
-    if (tetrisContext->gameover) {
+    if (tetrisContext->gameOver) {
         DrawGameOver(renderContext);
     }
     SDL_RenderPresent(renderContext->renderer);
@@ -224,11 +235,10 @@ void DrawSettingsScreen(RenderContext *renderContext, TetrisContext *tetrisConte
     SDL_snprintf(text, sizeof(text), "%d", tetrisContext->level);
     DrawText(renderContext, text, 30, 110);
     DrawText(renderContext, "STARTING BLOCKS", 30, 160);
-    SDL_snprintf(text, sizeof(text), "%d", tetrisContext->randblocks);
+    SDL_snprintf(text, sizeof(text), "%d", tetrisContext->startingBlocks);
     DrawText(renderContext, text, 30, 190);
     DrawText(renderContext, "UP / DOWN     Change level", 30, 250);
     DrawText(renderContext, "LEFT / RIGHT  Change starting blocks", 30, 280);
     DrawText(renderContext, "ENTER         Start", 30, 325);
     SDL_RenderPresent(renderContext->renderer);
 }
-

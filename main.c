@@ -44,12 +44,13 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
         SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Could not initialize tetrisContext.");
         return SDL_APP_FAILURE;
     }
-    InitTetrisContext(tetrisContext, LEVEL_MIN, RANDBLOCKS_MIN);
+    InitTetrisContext(tetrisContext, LEVEL_MIN, STARTING_BLOCKS_MIN);
     RenderContext *renderContext = SDL_malloc(sizeof(RenderContext));
     if (renderContext == NULL) {
         SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Could not initialize renderContext.");
         return SDL_APP_FAILURE;
     }
+    renderContext->window = window;
     renderContext->renderer = renderer;
     renderContext->font = font;
     GameState *gameState = SDL_malloc(sizeof(GameState));
@@ -95,10 +96,13 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
 
 void SDL_AppQuit(void *appstate, SDL_AppResult result)
 {
-    // TODO cleanup
     GameState *gameState = (GameState *) appstate;
     TTF_CloseFont(gameState->renderContext->font);
     TTF_Quit();
+    SDL_DestroyRenderer(gameState->renderContext->renderer);
+    SDL_DestroyWindow(gameState->renderContext->window);
+    SDL_free(gameState->renderContext);
     SDL_free(gameState->tetrisContext);
     SDL_free(gameState);
+    SDL_Quit();
 }

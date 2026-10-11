@@ -19,6 +19,7 @@
 #define PADDING_HEIGHT 30
 
 typedef struct {
+    SDL_Window *window;
     SDL_Renderer *renderer;
     TTF_Font *font;
 } RenderContext;

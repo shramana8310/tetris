@@ -15,8 +15,8 @@
 
 #define MSPT_MIN 100 
 
-#define RANDBLOCKS_MAX 20
-#define RANDBLOCKS_MIN 0
+#define STARTING_BLOCKS_MAX 20
+#define STARTING_BLOCKS_MIN 0
 
 typedef enum {
     TETROMINO_I = 0,
@@ -41,17 +41,6 @@ typedef enum {
     BLOCK_NONE,
 } BlockColor;
 
-typedef enum {
-    BLOCK_EMPTY,
-    BLOCK_MOVING,
-    BLOCK_FIXED,
-} BlockState;
-
-typedef struct {
-    BlockState state;
-    BlockColor color;
-} Block;
-
 typedef struct {
     int row;
     int col;
@@ -62,28 +51,30 @@ typedef struct {
     BlockColor color;
 } Tetromino;
 
-// TODO MAJOR REFACTORING Let's rethink how we represent the board and the current tetromino
 typedef struct {
-    Block board[BOARD_ROWS][BOARD_COLS];
+    BlockColor board[BOARD_ROWS][BOARD_COLS];
+    Tetromino current;
     TetrominoType next;
-    Uint64 lasttick;
+    bool moving;
+    Uint64 lastTick;
     Uint8 level;
-    Uint8 randblocks;
+    Uint8 startingBlocks;
     Uint16 mspt;
     Uint16 score;
-    bool gameover;
+    bool gameOver;
     bool paused;
 } TetrisContext;
 
-void InitTetrisContext(TetrisContext *context, Uint8 level, Uint8 randblocks);
+void InitTetrisContext(TetrisContext *context, Uint8 level, Uint8 startingBlocks);
 void UpdateGamePlay(TetrisContext *context);
 void MoveDown(TetrisContext *context);
 void MoveLeft(TetrisContext *context);
 void MoveRight(TetrisContext *context);
 void Rotate(TetrisContext *context);
 void TogglePause(TetrisContext *context);
-void IncrementRandBlocks(TetrisContext *context);
-void DecrementRandBlocks(TetrisContext *context);
+void IncrementStartingBlocks(TetrisContext *context);
+void DecrementStartingBlocks(TetrisContext *context);
 void IncrementLevel(TetrisContext *context);
 void DecrementLevel(TetrisContext *context);
+
 Tetromino CreateTetrominoByType(TetrominoType tetrominoType);

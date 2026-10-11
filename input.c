@@ -1,14 +1,16 @@
 #include "input.h"
+#include "state.h"
+#include "tetris.h"
 
 void HandleKeyDownInSettings(GameState *gamestate, SDL_Keycode keycode)
 {
     TetrisContext *tetrisContext = gamestate->tetrisContext;
     switch (keycode) {
         case SDLK_RIGHT:
-            IncrementRandBlocks(tetrisContext);
+            IncrementStartingBlocks(tetrisContext);
             break;
         case SDLK_LEFT:
-            DecrementRandBlocks(tetrisContext);
+            DecrementStartingBlocks(tetrisContext);
             break;
         case SDLK_UP:
             IncrementLevel(tetrisContext);
@@ -17,7 +19,7 @@ void HandleKeyDownInSettings(GameState *gamestate, SDL_Keycode keycode)
             DecrementLevel(tetrisContext);
             break;
         case SDLK_RETURN:
-            InitTetrisContext(tetrisContext, tetrisContext->level, tetrisContext->randblocks);
+            InitTetrisContext(tetrisContext, tetrisContext->level, tetrisContext->startingBlocks);
             gamestate->mode = MODE_GAMEPLAY;
             break;
     }
@@ -38,7 +40,7 @@ void HandleKeyDownInGamePlay(GameState *gamestate, SDL_Keycode keycode)
             gamestate->mode = MODE_SETTINGS;
             break;
         case SDLK_R:
-            InitTetrisContext(tetrisContext, tetrisContext->level, tetrisContext->randblocks);
+            InitTetrisContext(tetrisContext, tetrisContext->level, tetrisContext->startingBlocks);
             break;
         case SDLK_LEFT:
             MoveLeft(tetrisContext);
@@ -47,7 +49,9 @@ void HandleKeyDownInGamePlay(GameState *gamestate, SDL_Keycode keycode)
             MoveRight(tetrisContext);
             break;
         case SDLK_DOWN:
-            MoveDown(tetrisContext);
+            if (tetrisContext->moving) {
+                MoveDown(tetrisContext);
+            }
             break;
         case SDLK_UP:
             Rotate(tetrisContext);
