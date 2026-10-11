@@ -1,6 +1,6 @@
 #include "tetris.h"
 
-void PopNextTetromino(TetrisContext *context);
+void SpawnNextTetromino(TetrisContext *context);
 int GetRowsToClear(TetrisContext *context, int r);
 void ClearRows(TetrisContext *context, int r, int n);
 Uint16 LevelToMSPT(Uint8 level);
@@ -26,7 +26,7 @@ void InitTetrisContext(TetrisContext *context, Uint8 level, Uint8 startingBlocks
         ++i;
     }
     context->next = SDL_rand(TETROMINO_COUNT);
-    PopNextTetromino(context);
+    SpawnNextTetromino(context);
     context->lastTick = SDL_GetTicks();
     context->level = level;
     context->startingBlocks = startingBlocks;
@@ -44,7 +44,7 @@ void UpdateGamePlay(TetrisContext *context)
             if (context->moving) {
                 MoveDown(context);
             } else {
-                PopNextTetromino(context);
+                SpawnNextTetromino(context);
             }
             UpdateTetrisContext(context);
         }
@@ -289,7 +289,7 @@ Tetromino CreateTetrominoByType(TetrominoType tetrominoType)
     return tetromino;
 }
 
-void PopNextTetromino(TetrisContext *context)
+void SpawnNextTetromino(TetrisContext *context)
 {
     Tetromino tetromino;
     Coordinate coordinate;
