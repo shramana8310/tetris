@@ -14,3 +14,9 @@ cmake --build build
 ```bash
 ./build/tetris
 ```
+
+## Third-Party Assets
+
+The font `press-start-2p-latin-400-normal.ttf` is licensed
+under the SIL Open Font License, Version 1.1 (OFL).
+See [LICENSES/OFL.txt](LICENSES/OFL.txt) for details.
