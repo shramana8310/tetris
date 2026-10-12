@@ -46,8 +46,17 @@ typedef struct {
     int col;
 } Coordinate;
 
+typedef enum {
+    ORIENTATION_NORTH,
+    ORIENTATION_EAST,
+    ORIENTATION_SOUTH,
+    ORIENTATION_WEST,
+} Orientation;
+
 typedef struct {
+    TetrominoType type;
     Coordinate coordinates[NO_BLOCKS_PER_TETROMINO];
+    Orientation orientation;
     BlockColor color;
 } Tetromino;
 
@@ -78,3 +87,4 @@ void IncrementLevel(TetrisContext *context);
 void DecrementLevel(TetrisContext *context);
 
 Tetromino CreateTetrominoByType(TetrominoType tetrominoType);
+Tetromino CreateGhostTetromino(TetrisContext *context);

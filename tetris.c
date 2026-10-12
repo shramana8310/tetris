@@ -1,6 +1,13 @@
 #include "tetris.h"
+#define WALL_KICK_PAIR_SIZE 4
+
+struct Pair { int r; int c; };
 
 void SpawnNextTetromino(TetrisContext *context);
+Tetromino RotateTetromino(Tetromino tetromino);
+Tetromino ShiftTetromino(Tetromino tetromino, int r, int c);
+bool CanPlaceTetromino(TetrisContext *context, Tetromino tetromino);
+void GetWallKickPairs(TetrominoType type, Orientation orientation, struct Pair pairs[WALL_KICK_PAIR_SIZE]);
 int GetRowsToClear(TetrisContext *context, int r);
 void ClearRows(TetrisContext *context, int r, int n);
 Uint16 LevelToMSPT(Uint8 level);
@@ -108,64 +115,24 @@ void MoveRight(TetrisContext *context)
     }
 }
 
-// TODO fix rotation logic
 void Rotate(TetrisContext *context)
 {
-    int x_min = BOARD_COLS;
-    int x_max = -1;
-    int y_min = BOARD_ROWS;
-    int y_max = -1;
-
-    int i, j;
-    for (i = 0; i < NO_BLOCKS_PER_TETROMINO; ++i) {
-        x_min = SDL_min(context->current.coordinates[i].col, x_min);
-        x_max = SDL_max(context->current.coordinates[i].col, x_max);
-        y_min = SDL_min(context->current.coordinates[i].row, y_min);
-        y_max = SDL_max(context->current.coordinates[i].row, y_max);
-    }
-
-    if (x_max == -1) {
+    int i;
+    Tetromino after, temp;
+    after = RotateTetromino(context->current);
+    if (CanPlaceTetromino(context, after)) {
+        context->current = after;
         return;
     }
-
-    int x_axis = (x_min + x_max) / 2;
-    int y_axis = (y_min + y_max) / 2;
-
-    int new_rows[4];
-    int new_cols[4];
-    int count = 0;
-
-    Coordinate coordinate;
-    for (i = 0; i < NO_BLOCKS_PER_TETROMINO; ++i) {
-        Coordinate coordinate = context->current.coordinates[i];
-        int dx = coordinate.col - x_axis;
-        int dy = coordinate.row - y_axis;
-
-        int new_col = x_axis - dy;
-        int new_row = y_axis + dx;
-
-        if (new_row < 0 || new_row >= BOARD_ROWS ||
-            new_col < 0 || new_col >= BOARD_COLS) {
+    struct Pair pairs[WALL_KICK_PAIR_SIZE];
+    GetWallKickPairs(context->current.type, context->current.orientation, pairs);
+    for (i = 0; i < 4; ++i) {
+        temp = ShiftTetromino(after, pairs[i].r, pairs[i].c);
+        if (CanPlaceTetromino(context, temp)) {
+            context->current = temp;
             return;
         }
-
-        if (context->board[new_row][new_col] != BLOCK_NONE) {
-            return;
-        }
-
-        new_rows[count] = new_row;
-        new_cols[count] = new_col;
-        ++count;
-
     }
-
-    BlockColor color;
-
-    for (i = 0; i < NO_BLOCKS_PER_TETROMINO; ++i) {
-        context->current.coordinates[i].row = new_rows[i];
-        context->current.coordinates[i].col = new_cols[i];
-    }
-
 }
 
 void TogglePause(TetrisContext *context)
@@ -204,60 +171,62 @@ void DecrementLevel(TetrisContext *context)
 Tetromino CreateTetrominoByType(TetrominoType tetrominoType)
 {
     Tetromino tetromino;
+    tetromino.type = tetrominoType;
+    tetromino.orientation = ORIENTATION_NORTH;
     switch (tetrominoType) {
         case TETROMINO_I:
-            tetromino.coordinates[0].row = 0;
+            tetromino.coordinates[0].row = 1;
             tetromino.coordinates[0].col = 0;
             tetromino.coordinates[1].row = 1;
-            tetromino.coordinates[1].col = 0;
-            tetromino.coordinates[2].row = 2;
-            tetromino.coordinates[2].col = 0;
-            tetromino.coordinates[3].row = 3;
-            tetromino.coordinates[3].col = 0;
+            tetromino.coordinates[1].col = 1;
+            tetromino.coordinates[2].row = 1;
+            tetromino.coordinates[2].col = 2;
+            tetromino.coordinates[3].row = 1;
+            tetromino.coordinates[3].col = 3;
             tetromino.color = BLOCK_CYAN;
             break;
         case TETROMINO_O:
             tetromino.coordinates[0].row = 0;
-            tetromino.coordinates[0].col = 0;
+            tetromino.coordinates[0].col = 1;
             tetromino.coordinates[1].row = 0;
-            tetromino.coordinates[1].col = 1;
+            tetromino.coordinates[1].col = 2;
             tetromino.coordinates[2].row = 1;
-            tetromino.coordinates[2].col = 0;
+            tetromino.coordinates[2].col = 1;
             tetromino.coordinates[3].row = 1;
-            tetromino.coordinates[3].col = 1;
+            tetromino.coordinates[3].col = 2;
             tetromino.color = BLOCK_YELLOW;
             break;
         case TETROMINO_T:
             tetromino.coordinates[0].row = 0;
-            tetromino.coordinates[0].col = 0;
-            tetromino.coordinates[1].row = 0;
-            tetromino.coordinates[1].col = 1;
-            tetromino.coordinates[2].row = 0;
-            tetromino.coordinates[2].col = 2;
+            tetromino.coordinates[0].col = 1;
+            tetromino.coordinates[1].row = 1;
+            tetromino.coordinates[1].col = 0;
+            tetromino.coordinates[2].row = 1;
+            tetromino.coordinates[2].col = 1;
             tetromino.coordinates[3].row = 1;
-            tetromino.coordinates[3].col = 1;
+            tetromino.coordinates[3].col = 2;
             tetromino.color = BLOCK_PURPLE;
             break;
         case TETROMINO_L:
             tetromino.coordinates[0].row = 0;
-            tetromino.coordinates[0].col = 0;
+            tetromino.coordinates[0].col = 2;
             tetromino.coordinates[1].row = 1;
             tetromino.coordinates[1].col = 0;
-            tetromino.coordinates[2].row = 2;
-            tetromino.coordinates[2].col = 0;
-            tetromino.coordinates[3].row = 2;
-            tetromino.coordinates[3].col = 1;
+            tetromino.coordinates[2].row = 1;
+            tetromino.coordinates[2].col = 1;
+            tetromino.coordinates[3].row = 1;
+            tetromino.coordinates[3].col = 2;
             tetromino.color = BLOCK_ORANGE;
             break;
         case TETROMINO_J:
             tetromino.coordinates[0].row = 0;
-            tetromino.coordinates[0].col = 1;
+            tetromino.coordinates[0].col = 0;
             tetromino.coordinates[1].row = 1;
-            tetromino.coordinates[1].col = 1;
-            tetromino.coordinates[2].row = 2;
+            tetromino.coordinates[1].col = 0;
+            tetromino.coordinates[2].row = 1;
             tetromino.coordinates[2].col = 1;
-            tetromino.coordinates[3].row = 2;
-            tetromino.coordinates[3].col = 0;
+            tetromino.coordinates[3].row = 1;
+            tetromino.coordinates[3].col = 2;
             tetromino.color = BLOCK_BLUE;
             break;
         case TETROMINO_S:
@@ -289,19 +258,43 @@ Tetromino CreateTetrominoByType(TetrominoType tetrominoType)
     return tetromino;
 }
 
+Tetromino CreateGhostTetromino(TetrisContext *context)
+{
+    Tetromino tetromino;
+    int r, i;
+    bool found;
+    Coordinate coordinate;
+    tetromino = context->current;
+    found = false;
+    for (r = 1; r < BOARD_ROWS; ++r) {
+        for (i = 0; i < NO_BLOCKS_PER_TETROMINO; ++i) {
+            coordinate = tetromino.coordinates[i];
+            if (coordinate.row + r == BOARD_ROWS || 
+                context->board[coordinate.row + r][coordinate.col] != BLOCK_NONE) {
+                found = true;
+                break;
+            }
+        }
+        if (found) {
+            break;
+        }
+    }
+    for (i = 0; i < NO_BLOCKS_PER_TETROMINO; ++i) {
+        tetromino.coordinates[i].row += r-1;
+    }
+    return tetromino;
+}
+
 void SpawnNextTetromino(TetrisContext *context)
 {
     Tetromino tetromino;
     Coordinate coordinate;
     int i, r, c;
     tetromino = CreateTetrominoByType(context->next);
-    r = 0;
-    c = (BOARD_COLS - 1) / 2;
+    c = (BOARD_COLS / 2) - 2;
     for (i = 0; i < NO_BLOCKS_PER_TETROMINO; ++i) {
-        tetromino.coordinates[i].row += r;
         tetromino.coordinates[i].col += c;
     }
-    // TODO adjust col or rotate?
     for (i = 0; i < NO_BLOCKS_PER_TETROMINO; ++i) {
         coordinate = tetromino.coordinates[i];
         if (context->board[coordinate.row][coordinate.col] != BLOCK_NONE) {
@@ -312,6 +305,467 @@ void SpawnNextTetromino(TetrisContext *context)
     context->current = tetromino;
     context->moving = true;
     context->next = SDL_rand(TETROMINO_COUNT);
+}
+
+Tetromino RotateTetromino(Tetromino tetromino)
+{
+    switch (tetromino.type) {
+        case TETROMINO_I:
+            switch (tetromino.orientation) {
+                case ORIENTATION_NORTH:
+                    tetromino.coordinates[0].row -= 1;
+                    tetromino.coordinates[0].col += 2;
+                    tetromino.coordinates[1].row += 0;
+                    tetromino.coordinates[1].col += 1;
+                    tetromino.coordinates[2].row += 1;
+                    tetromino.coordinates[2].col += 0;
+                    tetromino.coordinates[3].row += 2;
+                    tetromino.coordinates[3].col -= 1;
+                    tetromino.orientation = ORIENTATION_EAST;
+                    break;
+                case ORIENTATION_EAST:
+                    tetromino.coordinates[0].row += 2;
+                    tetromino.coordinates[0].col += 1;
+                    tetromino.coordinates[1].row += 1;
+                    tetromino.coordinates[1].col += 0;
+                    tetromino.coordinates[2].row += 0;
+                    tetromino.coordinates[2].col -= 1;
+                    tetromino.coordinates[3].row -= 1;
+                    tetromino.coordinates[3].col -= 2;
+                    tetromino.orientation = ORIENTATION_SOUTH;
+                    break;
+                case ORIENTATION_SOUTH:
+                    tetromino.coordinates[0].row += 1;
+                    tetromino.coordinates[0].col -= 2;
+                    tetromino.coordinates[1].row += 0;
+                    tetromino.coordinates[1].col -= 1;
+                    tetromino.coordinates[2].row -= 1;
+                    tetromino.coordinates[2].col += 0;
+                    tetromino.coordinates[3].row -= 2;
+                    tetromino.coordinates[3].col += 1;
+                    tetromino.orientation = ORIENTATION_WEST;
+                    break;
+                case ORIENTATION_WEST:
+                    tetromino.coordinates[0].row -= 2;
+                    tetromino.coordinates[0].col -= 1;
+                    tetromino.coordinates[1].row -= 1;
+                    tetromino.coordinates[1].col += 0;
+                    tetromino.coordinates[2].row += 0;
+                    tetromino.coordinates[2].col += 1;
+                    tetromino.coordinates[3].row += 1;
+                    tetromino.coordinates[3].col += 2;
+                    tetromino.orientation = ORIENTATION_NORTH;
+                    break;
+                default:
+                    break;
+            }
+            break;
+        case TETROMINO_O:
+            switch (tetromino.orientation) {
+                case ORIENTATION_NORTH:
+                    tetromino.coordinates[0].row += 0;
+                    tetromino.coordinates[0].col += 0;
+                    tetromino.coordinates[1].row += 0;
+                    tetromino.coordinates[1].col += 0;
+                    tetromino.coordinates[2].row += 0;
+                    tetromino.coordinates[2].col += 0;
+                    tetromino.coordinates[3].row += 0;
+                    tetromino.coordinates[3].col += 0;
+                    tetromino.orientation = ORIENTATION_EAST;
+                    break;
+                case ORIENTATION_EAST:
+                    tetromino.coordinates[0].row += 0;
+                    tetromino.coordinates[0].col += 0;
+                    tetromino.coordinates[1].row += 0;
+                    tetromino.coordinates[1].col += 0;
+                    tetromino.coordinates[2].row += 0;
+                    tetromino.coordinates[2].col += 0;
+                    tetromino.coordinates[3].row += 0;
+                    tetromino.coordinates[3].col += 0;
+                    tetromino.orientation = ORIENTATION_SOUTH;
+                    break;
+                case ORIENTATION_SOUTH:
+                    tetromino.coordinates[0].row += 0;
+                    tetromino.coordinates[0].col += 0;
+                    tetromino.coordinates[1].row += 0;
+                    tetromino.coordinates[1].col += 0;
+                    tetromino.coordinates[2].row += 0;
+                    tetromino.coordinates[2].col += 0;
+                    tetromino.coordinates[3].row += 0;
+                    tetromino.coordinates[3].col += 0;
+                    tetromino.orientation = ORIENTATION_WEST;
+                    break;
+                case ORIENTATION_WEST:
+                    tetromino.coordinates[0].row += 0;
+                    tetromino.coordinates[0].col += 0;
+                    tetromino.coordinates[1].row += 0;
+                    tetromino.coordinates[1].col += 0;
+                    tetromino.coordinates[2].row += 0;
+                    tetromino.coordinates[2].col += 0;
+                    tetromino.coordinates[3].row += 0;
+                    tetromino.coordinates[3].col += 0;
+                    tetromino.orientation = ORIENTATION_NORTH;
+                    break;
+                default:
+                    break;
+            }
+            break;
+        case TETROMINO_T:
+            switch (tetromino.orientation) {
+                case ORIENTATION_NORTH:
+                    tetromino.coordinates[0].row += 1;
+                    tetromino.coordinates[0].col += 1;
+                    tetromino.coordinates[1].row -= 1;
+                    tetromino.coordinates[1].col += 1;
+                    tetromino.coordinates[2].row += 0;
+                    tetromino.coordinates[2].col += 0;
+                    tetromino.coordinates[3].row += 1;
+                    tetromino.coordinates[3].col -= 1;
+                    tetromino.orientation = ORIENTATION_EAST;
+                    break;
+                case ORIENTATION_EAST:
+                    tetromino.coordinates[0].row += 1;
+                    tetromino.coordinates[0].col -= 1;
+                    tetromino.coordinates[1].row += 1;
+                    tetromino.coordinates[1].col += 1;
+                    tetromino.coordinates[2].row += 0;
+                    tetromino.coordinates[2].col += 0;
+                    tetromino.coordinates[3].row -= 1;
+                    tetromino.coordinates[3].col -= 1;
+                    tetromino.orientation = ORIENTATION_SOUTH;
+                    break;
+                case ORIENTATION_SOUTH:
+                    tetromino.coordinates[0].row -= 1;
+                    tetromino.coordinates[0].col -= 1;
+                    tetromino.coordinates[1].row += 1;
+                    tetromino.coordinates[1].col -= 1;
+                    tetromino.coordinates[2].row += 0;
+                    tetromino.coordinates[2].col += 0;
+                    tetromino.coordinates[3].row -= 1;
+                    tetromino.coordinates[3].col += 1;
+                    tetromino.orientation = ORIENTATION_WEST;
+                    break;
+                case ORIENTATION_WEST:
+                    tetromino.coordinates[0].row -= 1;
+                    tetromino.coordinates[0].col += 1;
+                    tetromino.coordinates[1].row -= 1;
+                    tetromino.coordinates[1].col -= 1;
+                    tetromino.coordinates[2].row += 0;
+                    tetromino.coordinates[2].col += 0;
+                    tetromino.coordinates[3].row += 1;
+                    tetromino.coordinates[3].col += 1;
+                    tetromino.orientation = ORIENTATION_NORTH;
+                    break;
+                default:
+                    break;
+            }
+            break;
+        case TETROMINO_L:
+            switch (tetromino.orientation) {
+                case ORIENTATION_NORTH:
+                    tetromino.coordinates[0].row += 2;
+                    tetromino.coordinates[0].col += 0;
+                    tetromino.coordinates[1].row -= 1;
+                    tetromino.coordinates[1].col += 1;
+                    tetromino.coordinates[2].row += 0;
+                    tetromino.coordinates[2].col += 0;
+                    tetromino.coordinates[3].row += 1;
+                    tetromino.coordinates[3].col -= 1;
+                    tetromino.orientation = ORIENTATION_EAST;
+                    break;
+                case ORIENTATION_EAST:
+                    tetromino.coordinates[0].row += 0;
+                    tetromino.coordinates[0].col -= 2;
+                    tetromino.coordinates[1].row += 1;
+                    tetromino.coordinates[1].col += 1;
+                    tetromino.coordinates[2].row += 0;
+                    tetromino.coordinates[2].col += 0;
+                    tetromino.coordinates[3].row -= 1;
+                    tetromino.coordinates[3].col -= 1;
+                    tetromino.orientation = ORIENTATION_SOUTH;
+                    break;
+                case ORIENTATION_SOUTH:
+                    tetromino.coordinates[0].row -= 2;
+                    tetromino.coordinates[0].col += 0;
+                    tetromino.coordinates[1].row += 1;
+                    tetromino.coordinates[1].col -= 1;
+                    tetromino.coordinates[2].row += 0;
+                    tetromino.coordinates[2].col += 0;
+                    tetromino.coordinates[3].row -= 1;
+                    tetromino.coordinates[3].col += 1;
+                    tetromino.orientation = ORIENTATION_WEST;
+                    break;
+                case ORIENTATION_WEST:
+                    tetromino.coordinates[0].row += 0;
+                    tetromino.coordinates[0].col += 2;
+                    tetromino.coordinates[1].row -= 1;
+                    tetromino.coordinates[1].col -= 1;
+                    tetromino.coordinates[2].row += 0;
+                    tetromino.coordinates[2].col += 0;
+                    tetromino.coordinates[3].row += 1;
+                    tetromino.coordinates[3].col += 1;
+                    tetromino.orientation = ORIENTATION_NORTH;
+                    break;
+                default:
+                    break;
+            }
+            break;
+        case TETROMINO_J:
+            switch (tetromino.orientation) {
+                case ORIENTATION_NORTH:
+                    tetromino.coordinates[0].row += 0;
+                    tetromino.coordinates[0].col += 2;
+                    tetromino.coordinates[1].row -= 1;
+                    tetromino.coordinates[1].col += 1;
+                    tetromino.coordinates[2].row += 0;
+                    tetromino.coordinates[2].col += 0;
+                    tetromino.coordinates[3].row += 1;
+                    tetromino.coordinates[3].col -= 1;
+                    tetromino.orientation = ORIENTATION_EAST;
+                    break;
+                case ORIENTATION_EAST:
+                    tetromino.coordinates[0].row += 2;
+                    tetromino.coordinates[0].col += 0;
+                    tetromino.coordinates[1].row += 1;
+                    tetromino.coordinates[1].col += 1;
+                    tetromino.coordinates[2].row += 0;
+                    tetromino.coordinates[2].col += 0;
+                    tetromino.coordinates[3].row -= 1;
+                    tetromino.coordinates[3].col -= 1;
+                    tetromino.orientation = ORIENTATION_SOUTH;
+                    break;
+                case ORIENTATION_SOUTH:
+                    tetromino.coordinates[0].row += 0;
+                    tetromino.coordinates[0].col -= 2;
+                    tetromino.coordinates[1].row += 1;
+                    tetromino.coordinates[1].col -= 1;
+                    tetromino.coordinates[2].row += 0;
+                    tetromino.coordinates[2].col += 0;
+                    tetromino.coordinates[3].row -= 1;
+                    tetromino.coordinates[3].col += 1;
+                    tetromino.orientation = ORIENTATION_WEST;
+                    break;
+                case ORIENTATION_WEST:
+                    tetromino.coordinates[0].row -= 2;
+                    tetromino.coordinates[0].col += 0;
+                    tetromino.coordinates[1].row -= 1;
+                    tetromino.coordinates[1].col -= 1;
+                    tetromino.coordinates[2].row += 0;
+                    tetromino.coordinates[2].col += 0;
+                    tetromino.coordinates[3].row += 1;
+                    tetromino.coordinates[3].col += 1;
+                    tetromino.orientation = ORIENTATION_NORTH;
+                    break;
+                default:
+                    break;
+            }
+            break;
+        case TETROMINO_S:
+            switch (tetromino.orientation) {
+                case ORIENTATION_NORTH:
+                    tetromino.coordinates[0].row += 1;
+                    tetromino.coordinates[0].col += 1;
+                    tetromino.coordinates[1].row += 2;
+                    tetromino.coordinates[1].col += 0;
+                    tetromino.coordinates[2].row -= 1;
+                    tetromino.coordinates[2].col += 1;
+                    tetromino.coordinates[3].row += 0;
+                    tetromino.coordinates[3].col += 0;
+                    tetromino.orientation = ORIENTATION_EAST;
+                    break;
+                case ORIENTATION_EAST:
+                    tetromino.coordinates[0].row += 1;
+                    tetromino.coordinates[0].col -= 1;
+                    tetromino.coordinates[1].row += 0;
+                    tetromino.coordinates[1].col -= 2;
+                    tetromino.coordinates[2].row += 1;
+                    tetromino.coordinates[2].col += 1;
+                    tetromino.coordinates[3].row += 0;
+                    tetromino.coordinates[3].col += 0;
+                    tetromino.orientation = ORIENTATION_SOUTH;
+                    break;
+                case ORIENTATION_SOUTH:
+                    tetromino.coordinates[0].row -= 1;
+                    tetromino.coordinates[0].col -= 1;
+                    tetromino.coordinates[1].row -= 2;
+                    tetromino.coordinates[1].col += 0;
+                    tetromino.coordinates[2].row += 1;
+                    tetromino.coordinates[2].col -= 1;
+                    tetromino.coordinates[3].row += 0;
+                    tetromino.coordinates[3].col += 0;
+                    tetromino.orientation = ORIENTATION_WEST;
+                    break;
+                case ORIENTATION_WEST:
+                    tetromino.coordinates[0].row -= 1;
+                    tetromino.coordinates[0].col += 1;
+                    tetromino.coordinates[1].row += 0;
+                    tetromino.coordinates[1].col += 2;
+                    tetromino.coordinates[2].row -= 1;
+                    tetromino.coordinates[2].col -= 1;
+                    tetromino.coordinates[3].row += 0;
+                    tetromino.coordinates[3].col += 0;
+                    tetromino.orientation = ORIENTATION_NORTH;
+                    break;
+                default:
+                    break;
+            }
+            break;
+        case TETROMINO_Z:
+            switch (tetromino.orientation) {
+                case ORIENTATION_NORTH:
+                    tetromino.coordinates[0].row += 0;
+                    tetromino.coordinates[0].col += 2;
+                    tetromino.coordinates[1].row += 1;
+                    tetromino.coordinates[1].col += 1;
+                    tetromino.coordinates[2].row += 0;
+                    tetromino.coordinates[2].col += 0;
+                    tetromino.coordinates[3].row += 1;
+                    tetromino.coordinates[3].col -= 1;
+                    tetromino.orientation = ORIENTATION_EAST;
+                    break;
+                case ORIENTATION_EAST:
+                    tetromino.coordinates[0].row += 2;
+                    tetromino.coordinates[0].col += 0;
+                    tetromino.coordinates[1].row += 1;
+                    tetromino.coordinates[1].col -= 1;
+                    tetromino.coordinates[2].row += 0;
+                    tetromino.coordinates[2].col += 0;
+                    tetromino.coordinates[3].row -= 1;
+                    tetromino.coordinates[3].col -= 1;
+                    tetromino.orientation = ORIENTATION_SOUTH;
+                    break;
+                case ORIENTATION_SOUTH:
+                    tetromino.coordinates[0].row += 0;
+                    tetromino.coordinates[0].col -= 2;
+                    tetromino.coordinates[1].row -= 1;
+                    tetromino.coordinates[1].col -= 1;
+                    tetromino.coordinates[2].row += 0;
+                    tetromino.coordinates[2].col += 0;
+                    tetromino.coordinates[3].row -= 1;
+                    tetromino.coordinates[3].col += 1;
+                    tetromino.orientation = ORIENTATION_WEST;
+                    break;
+                case ORIENTATION_WEST:
+                    tetromino.coordinates[0].row -= 2;
+                    tetromino.coordinates[0].col += 0;
+                    tetromino.coordinates[1].row -= 1;
+                    tetromino.coordinates[1].col += 1;
+                    tetromino.coordinates[2].row += 0;
+                    tetromino.coordinates[2].col += 0;
+                    tetromino.coordinates[3].row += 1;
+                    tetromino.coordinates[3].col += 1;
+                    tetromino.orientation = ORIENTATION_NORTH;
+                    break;
+                default:
+                    break;
+            }
+            break;
+        case TETROMINO_COUNT:
+        default:
+            break;
+    }
+    return tetromino;
+}
+
+void GetWallKickPairs(TetrominoType type, Orientation orientation, struct Pair pairs[WALL_KICK_PAIR_SIZE])
+{
+    switch (type) {
+        case TETROMINO_I:
+            switch (orientation) {
+                case ORIENTATION_NORTH:
+                    pairs[0].r = 0;  pairs[0].c = -2;
+                    pairs[1].r = 0;  pairs[1].c = 1;
+                    pairs[2].r = 1;  pairs[2].c = -2;
+                    pairs[3].r = -2; pairs[3].c = 1;
+                    break;
+                case ORIENTATION_EAST:
+                    pairs[0].r = 0;  pairs[0].c = -1;
+                    pairs[1].r = 0;  pairs[1].c = 2;
+                    pairs[2].r = -2; pairs[2].c = -1;
+                    pairs[3].r = 1;  pairs[3].c = 2;
+                    break;
+                case ORIENTATION_SOUTH:
+                    pairs[0].r = 0;  pairs[0].c = 2;
+                    pairs[1].r = 0;  pairs[1].c = -1;
+                    pairs[2].r = -1; pairs[2].c = 2;
+                    pairs[3].r = 2;  pairs[3].c = -1;
+                    break;
+                case ORIENTATION_WEST:
+                    pairs[0].r = 0;  pairs[0].c = 1;
+                    pairs[1].r = 0;  pairs[1].c = -2;
+                    pairs[2].r = 2;  pairs[2].c = 1;
+                    pairs[3].r = -1; pairs[3].c = -2;
+                    break;
+                default:
+                    break;
+            }
+            break;
+        case TETROMINO_O:
+        case TETROMINO_T:
+        case TETROMINO_L:
+        case TETROMINO_J:
+        case TETROMINO_S:
+        case TETROMINO_Z:
+            switch (orientation) {
+                case ORIENTATION_NORTH:
+                    pairs[0].r = 0;  pairs[0].c = -1;
+                    pairs[1].r = -1; pairs[1].c = -1;
+                    pairs[2].r = 2;  pairs[2].c = 0;
+                    pairs[3].r = 2;  pairs[3].c = -1;
+                    break;
+                case ORIENTATION_EAST:
+                    pairs[0].r = 0;  pairs[0].c = 1;
+                    pairs[1].r = 1;  pairs[1].c = 1;
+                    pairs[2].r = -2; pairs[2].c = 0;
+                    pairs[3].r = -2; pairs[3].c = 1;
+                    break;
+                case ORIENTATION_SOUTH:
+                    pairs[0].r = 0;  pairs[0].c = 1;
+                    pairs[1].r = -1; pairs[1].c = 1;
+                    pairs[2].r = 2;  pairs[2].c = 0;
+                    pairs[3].r = 2;  pairs[3].c = 1;
+                    break;
+                case ORIENTATION_WEST:
+                    pairs[0].r = 0;  pairs[0].c = -1;
+                    pairs[1].r = 1;  pairs[1].c = -1;
+                    pairs[2].r = -2; pairs[2].c = 0;
+                    pairs[3].r = -2; pairs[3].c = -1;
+                    break;
+                default:
+                    break;
+            }
+            break;
+        case TETROMINO_COUNT:
+        default:
+            break;
+    }
+}
+
+bool CanPlaceTetromino(TetrisContext *context, Tetromino tetromino)
+{
+    int i;
+    Coordinate coordinate;
+    for (i = 0; i < NO_BLOCKS_PER_TETROMINO; ++i) {
+        coordinate = tetromino.coordinates[i];
+        if (coordinate.row < 0 || coordinate.row >= BOARD_ROWS ||
+            coordinate.col < 0 || coordinate.col >= BOARD_COLS) {
+            return false;
+        }
+        if (context->board[coordinate.row][coordinate.col] != BLOCK_NONE) {
+            return false;
+        }
+    }
+    return true;
+}
+
+Tetromino ShiftTetromino(Tetromino tetromino, int r, int c)
+{
+    int i;
+    for (i = 0; i < NO_BLOCKS_PER_TETROMINO; ++i) {
+        tetromino.coordinates[i].row += r;
+        tetromino.coordinates[i].col += c;
+    }
+    return tetromino;
 }
 
 int GetRowsToClear(TetrisContext *context, int r)
