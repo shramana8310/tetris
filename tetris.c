@@ -65,7 +65,7 @@ void MoveDown(TetrisContext *context)
     Coordinate coordinate;
     for (i = 0; i < NO_BLOCKS_PER_TETROMINO; ++i) {
         coordinate = context->current.coordinates[i];
-        if (coordinate.row == BOARD_ROWS-1 || 
+        if (coordinate.row+1 >= BOARD_ROWS || 
             context->board[coordinate.row+1][coordinate.col] != BLOCK_NONE) {
             context->moving = false;
         }
@@ -89,7 +89,7 @@ void MoveLeft(TetrisContext *context)
     Coordinate coordinate;
     for (i = 0; i < NO_BLOCKS_PER_TETROMINO; ++i) {
         coordinate = context->current.coordinates[i];
-        if (coordinate.col == 0 || 
+        if (coordinate.col-1 < 0 || 
             context->board[coordinate.row][coordinate.col-1] != BLOCK_NONE) {
             return;
         }
@@ -105,7 +105,7 @@ void MoveRight(TetrisContext *context)
     Coordinate coordinate;
     for (i = 0; i < NO_BLOCKS_PER_TETROMINO; ++i) {
         coordinate = context->current.coordinates[i];
-        if (coordinate.col == BOARD_COLS-1 || 
+        if (coordinate.col+1 >= BOARD_COLS || 
             context->board[coordinate.row][coordinate.col+1] != BLOCK_NONE) {
             return;
         }
@@ -118,15 +118,16 @@ void MoveRight(TetrisContext *context)
 void Rotate(TetrisContext *context)
 {
     int i;
-    Tetromino after, temp;
+    Tetromino after;
     after = RotateTetromino(context->current);
     if (CanPlaceTetromino(context, after)) {
         context->current = after;
         return;
     }
+    Tetromino temp;
     struct Pair pairs[WALL_KICK_PAIR_SIZE];
     GetWallKickPairs(context->current.type, context->current.orientation, pairs);
-    for (i = 0; i < 4; ++i) {
+    for (i = 0; i < WALL_KICK_PAIR_SIZE; ++i) {
         temp = ShiftTetromino(after, pairs[i].r, pairs[i].c);
         if (CanPlaceTetromino(context, temp)) {
             context->current = temp;
@@ -258,7 +259,7 @@ Tetromino CreateTetrominoByType(TetrominoType tetrominoType)
     return tetromino;
 }
 
-Tetromino CreateGhostTetromino(TetrisContext *context)
+Tetromino GetLandingTetromino(TetrisContext *context)
 {
     Tetromino tetromino;
     int r, i;
@@ -289,7 +290,7 @@ void SpawnNextTetromino(TetrisContext *context)
 {
     Tetromino tetromino;
     Coordinate coordinate;
-    int i, r, c;
+    int i, c;
     tetromino = CreateTetrominoByType(context->next);
     c = (BOARD_COLS / 2) - 2;
     for (i = 0; i < NO_BLOCKS_PER_TETROMINO; ++i) {

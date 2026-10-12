@@ -87,4 +87,4 @@ void IncrementLevel(TetrisContext *context);
 void DecrementLevel(TetrisContext *context);
 
 Tetromino CreateTetrominoByType(TetrominoType tetrominoType);
-Tetromino CreateGhostTetromino(TetrisContext *context);
+Tetromino GetLandingTetromino(TetrisContext *context);
