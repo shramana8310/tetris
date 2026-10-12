@@ -9,7 +9,7 @@
 #include "input.h"
 #define WINDOW_WIDTH (BOARD_OUTER_WIDTH + NEXT_TETROMINO_WINDOW_WIDTH + (PADDING_WIDTH * 3))
 #define WINDOW_HEIGHT (BOARD_OUTER_HEIGHT + (PADDING_HEIGHT * 2))
-#define FONT_FILENAME "assets/press-start-2p-latin-400-normal.ttf"
+#define FONT_FILENAME "assets/PressStart2P-Regular.ttf"
 
 SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
 {
