@@ -1,3 +1,4 @@
+#include <SDL3/SDL_filesystem.h>
 #define SDL_MAIN_USE_CALLBACKS 1
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
@@ -8,7 +9,7 @@
 #include "input.h"
 #define WINDOW_WIDTH (BOARD_OUTER_WIDTH + NEXT_TETROMINO_WINDOW_WIDTH + (PADDING_WIDTH * 3))
 #define WINDOW_HEIGHT (BOARD_OUTER_HEIGHT + (PADDING_HEIGHT * 2))
-#define FONT_FILENAME "press-start-2p-latin-400-normal.ttf"
+#define FONT_FILENAME "assets/press-start-2p-latin-400-normal.ttf"
 
 SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
 {
@@ -34,9 +35,16 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
         SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Could not create renderer: %s", SDL_GetError());
         return SDL_APP_FAILURE;
     }
-    TTF_Font *font = TTF_OpenFont(FONT_FILENAME, 14.0f);
+    char *fontPath = NULL;
+    if (!SDL_asprintf(&fontPath, "%s%s", SDL_GetBasePath(), FONT_FILENAME)) {
+        SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Could not construct font path");
+        return SDL_APP_FAILURE;
+    }
+    TTF_Font *font = TTF_OpenFont(fontPath, 14.0f);
+    SDL_free(fontPath);
+
     if (font == NULL) {
-        SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Could not load font: %s", SDL_GetError());
+        SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Could not load font '%s': %s", FONT_FILENAME, SDL_GetError());
         return SDL_APP_FAILURE;
     }
     TetrisContext *tetrisContext = SDL_malloc(sizeof(TetrisContext));

@@ -228,7 +228,7 @@ void DrawBoard(RenderContext *renderContext, TetrisContext *tetrisContext)
         Tetromino ghost = GetLandingTetromino(tetrisContext);
         for (i = 0; i < NO_BLOCKS_PER_TETROMINO; ++i) {
             coordinate = ghost.coordinates[i];
-            DrawBlock(renderContext, coordinate.row, coordinate.col, x_offset, y_offset, tetrisContext->current.color, 0.4f);
+            DrawBlock(renderContext, coordinate.row, coordinate.col, x_offset, y_offset, tetrisContext->current.color, 0.3f);
         }
     }
     // next tetromino
