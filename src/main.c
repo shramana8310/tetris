@@ -42,7 +42,6 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     }
     TTF_Font *font = TTF_OpenFont(fontPath, 14.0f);
     SDL_free(fontPath);
-
     if (font == NULL) {
         SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Could not load font '%s': %s", FONT_FILENAME, SDL_GetError());
         return SDL_APP_FAILURE;
