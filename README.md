@@ -14,9 +14,8 @@ cmake --build build
 ```bash
 ./build/tetris
 ```
-
 ## Third-Party Assets
 
-The font `PressStart2P-Regular.ttf` is licensed
-under the SIL Open Font License, Version 1.1 (OFL).
+The game uses [Press Start 2P](https://fonts.google.com/specimen/Press+Start+2P),
+licensed under the SIL Open Font License, Version 1.1.
 See [LICENSES/OFL.txt](LICENSES/OFL.txt) for details.
