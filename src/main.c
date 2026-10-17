@@ -67,7 +67,7 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     }
     gameState->tetrisContext = tetrisContext;
     gameState->renderContext = renderContext;
-    gameState->mode = MODE_SETTINGS;
+    gameState->mode = MODE_GAMEPLAY;
     *appstate = gameState;
     return SDL_APP_CONTINUE;
 }
