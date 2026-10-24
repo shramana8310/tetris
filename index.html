@@ -1,14 +1,14 @@
-
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#0b0d14">
-  <title>Tetris</title>
-
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport"/>
+  <meta content="#0b0d14" name="theme-color"/>
+  <title>
+   Tetris
+  </title>
   <style>
-    :root {
+   :root {
       color-scheme: dark;
       --bg: #0b0d14;
       --panel: #121622;
@@ -21,6 +21,17 @@
 
     * {
       box-sizing: border-box;
+    }
+
+    html,
+    body {
+      touch-action: pan-x pan-y;
+      overscroll-behavior: none;
+    }
+
+    canvas.emscripten,
+    #touch-controls {
+      touch-action: none;
     }
 
     body {
@@ -386,83 +397,97 @@
       }
     }
   </style>
-</head>
-
-<body>
+ </head>
+ <body>
   <main class="page">
-    <header>
-      <div class="brand">
-        <div class="mark" aria-hidden="true">
-          <span></span><span></span>
-          <span></span><span></span>
-        </div>
-        <div>
-          <h1>TETRIS</h1>
-          <p class="subtitle">A LITTLE BLOCK-BUILDING GAME</p>
-        </div>
-      </div>
-      <span class="tag">WEB EDITION</span>
-    </header>
-
-    <section class="game-panel" aria-label="Game">
-      <div class="game-toolbar">
-        <div class="game-label">
-          <span class="dot" id="status-dot"></span>
-          GAME
-        </div>
-        <div id="status" role="status" aria-live="polite">
-          Downloading...
-        </div>
-      </div>
-
-      <div class="stage">
-        <div class="emscripten_border">
-          <canvas
-            class="emscripten"
-            id="canvas"
-            oncontextmenu="event.preventDefault()"
-            tabindex="-1"
-            aria-label="Tetris game canvas"
-          ></canvas>
-        </div>
-      </div>
-
-    <div id="touch-controls">
-      <div class="control-group movement-controls">
-        <button type="button" data-action="left" aria-label="Move left">◀ LEFT</button>
-        <button type="button" data-action="right" aria-label="Move right">RIGHT ▶</button>
-        <button type="button" data-action="down" aria-label="Move down">▼ DOWN</button>
-      </div>
-
-      <div class="control-group action-controls">
-        <button type="button" data-action="rotate">↻ ROTATE</button>
-        <button type="button" data-action="hard-drop">⇊ DROP</button>
-      </div>
-
-      <div class="control-group system-controls">
-        <button type="button" data-action="restart">↻ RESTART</button>
-        <button type="button" data-action="pause">Ⅱ PAUSE</button>
-      </div>
+   <header>
+    <div class="brand">
+     <div aria-hidden="true" class="mark">
+      <span>
+      </span>
+      <span>
+      </span>
+      <span>
+      </span>
+      <span>
+      </span>
+     </div>
+     <div>
+      <h1>
+       TETRIS
+      </h1>
+      <p class="subtitle">
+       A LITTLE BLOCK-BUILDING GAME
+      </p>
+     </div>
     </div>
-
-      <div class="loading">
-        <progress value="0" max="100" id="progress" hidden></progress>
-      </div>
-    </section>
-
-    <details>
-      <summary>Developer console</summary>
-      <textarea id="output" rows="8" readonly
-        aria-label="Game console output"></textarea>
-    </details>
-
-    <footer>
-      BUILT WITH C · SDL3 · EMSCRIPTEN
-    </footer>
+    <span class="tag">
+     WEB EDITION
+    </span>
+   </header>
+   <section aria-label="Game" class="game-panel">
+    <div class="game-toolbar">
+     <div class="game-label">
+      <span class="dot" id="status-dot">
+      </span>
+      GAME
+     </div>
+     <div aria-live="polite" id="status" role="status">
+      Downloading...
+     </div>
+    </div>
+    <div class="stage">
+     <div class="emscripten_border">
+      <canvas aria-label="Tetris game canvas" class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" tabindex="-1">
+      </canvas>
+     </div>
+    </div>
+    <div id="touch-controls">
+     <div class="control-group movement-controls">
+      <button aria-label="Move left" data-action="left" type="button">
+       ◀ LEFT
+      </button>
+      <button aria-label="Move right" data-action="right" type="button">
+       RIGHT ▶
+      </button>
+      <button aria-label="Move down" data-action="down" type="button">
+       ▼ DOWN
+      </button>
+     </div>
+     <div class="control-group action-controls">
+      <button data-action="rotate" type="button">
+       ↻ ROTATE
+      </button>
+      <button data-action="hard-drop" type="button">
+       ⇊ DROP
+      </button>
+     </div>
+     <div class="control-group system-controls">
+      <button data-action="restart" type="button">
+       ↻ RESTART
+      </button>
+      <button data-action="pause" type="button">
+       Ⅱ PAUSE
+      </button>
+     </div>
+    </div>
+    <div class="loading">
+     <progress hidden="" id="progress" max="100" value="0">
+     </progress>
+    </div>
+   </section>
+   <details>
+    <summary>
+     Developer console
+    </summary>
+    <textarea aria-label="Game console output" id="output" readonly="" rows="8"></textarea>
+   </details>
+   <footer>
+    BUILT WITH C · SDL3 · EMSCRIPTEN
+   </footer>
   </main>
-
   <script>
-    var statusElement = document.getElementById('status');
+   var statusElement = document.getElementById('status');
     var progressElement = document.getElementById('progress');
     var canvasElement = document.getElementById('canvas');
     var outputElement = document.getElementById('output');
@@ -608,8 +633,8 @@
       document.getElementById('status-dot').style.background = '#ff6b7a';
     };
   </script>
-
-  <script async src="tetris.js"></script>
-</body>
+  <script async="" src="tetris.js">
+  </script>
+ </body>
 </html>
 
