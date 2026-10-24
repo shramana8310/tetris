@@ -173,6 +173,26 @@ void DrawText(RenderContext *renderContext, const char *text, float x, float y)
     SDL_DestroySurface(surface);
 }
 
+void DrawPaused(RenderContext *renderContext)
+{
+    SDL_Renderer *renderer = renderContext->renderer;
+    SDL_FRect rect = {
+        PADDING_WIDTH + (BOARD_WALL_WIDTH * 3),
+        PADDING_HEIGHT + (BLOCK_HEIGHT * 4),
+        BLOCK_WIDTH * 6,
+        BLOCK_HEIGHT * 2,
+    };
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 200);
+    SDL_RenderFillRect(renderer, &rect);
+    DrawText(
+        renderContext, 
+        "PAUSED", 
+        PADDING_WIDTH + BOARD_WALL_WIDTH + 100.0f, 
+        PADDING_HEIGHT + (BLOCK_HEIGHT * 4) + 23.0f
+    );
+}
+
 void DrawGameOver(RenderContext *renderContext)
 {
     SDL_Renderer *renderer = renderContext->renderer;
@@ -251,10 +271,14 @@ void DrawBoard(RenderContext *renderContext, TetrisContext *tetrisContext)
     SDL_snprintf(text, sizeof(text), "SCORE  %" SDL_PRIu32, tetrisContext->score);
     DrawText(renderContext, text, x_offset, info_y + 30);
     if (tetrisContext->paused) {
-        DrawText(renderContext, "PAUSED", x_offset, info_y + 60);
+        DrawPaused(renderContext);
     }
     if (tetrisContext->gameOver) {
         DrawGameOver(renderContext);
+    }
+    if (tetrisContext->paused || tetrisContext->gameOver) {
+        DrawText(renderContext, "PRESS R", x_offset, info_y + 60);
+        DrawText(renderContext, " TO RESTART", x_offset, info_y + 80);
     }
     SDL_RenderPresent(renderContext->renderer);
 }

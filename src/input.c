@@ -31,7 +31,7 @@ void HandleKeyDownInGamePlay(GameState *gamestate, SDL_Event *event)
     TetrisContext *tetrisContext = gamestate->tetrisContext;
     if (tetrisContext->gameOver) {
         switch (event->key.key) {
-            case SDLK_SPACE:
+            case SDLK_R:
                 InitTetrisContext(tetrisContext, tetrisContext->startingLevel, tetrisContext->startingBlocks);
                 break;
         }
@@ -42,6 +42,11 @@ void HandleKeyDownInGamePlay(GameState *gamestate, SDL_Event *event)
         return;
     }
     if (tetrisContext->paused) {
+        switch (event->key.key) {
+            case SDLK_R:
+                InitTetrisContext(tetrisContext, tetrisContext->startingLevel, tetrisContext->startingBlocks);
+                break;
+        }
         return;
     }
     switch (event->key.key) {
@@ -52,9 +57,7 @@ void HandleKeyDownInGamePlay(GameState *gamestate, SDL_Event *event)
             MoveRight(tetrisContext);
             break;
         case SDLK_DOWN:
-            if (tetrisContext->moving) {
-                MoveDown(tetrisContext);
-            }
+            MoveDown(tetrisContext);
             break;
         case SDLK_UP:
             if (!event->key.repeat) {

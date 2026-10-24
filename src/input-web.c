@@ -9,7 +9,8 @@ enum {
     TOUCH_RIGHT,
     TOUCH_ROTATE,
     TOUCH_HARD_DROP,
-    TOUCH_PAUSE
+    TOUCH_PAUSE,
+    TOUCH_RESTART
 };
 
 #ifdef __EMSCRIPTEN__
@@ -36,6 +37,9 @@ void PushTouchKey(int action, int pressed)
             break;
         case TOUCH_PAUSE:
             key = SDLK_ESCAPE;
+            break;
+        case TOUCH_RESTART:
+            key = SDLK_R;
             break;
         default:
             return;
