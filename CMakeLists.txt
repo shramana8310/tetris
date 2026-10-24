@@ -9,12 +9,18 @@ set(CMAKE_C_EXTENSIONS OFF)
 find_package(SDL3 REQUIRED CONFIG)
 find_package(SDL3_ttf REQUIRED CONFIG)
 
-add_executable(tetris
+set(TETRIS_SOURCES
     src/main.c
     src/tetris.c
     src/render.c
     src/input.c
 )
+
+if (EMSCRIPTEN)
+    list(APPEND TETRIS_SOURCES src/input-web.c)
+endif()
+
+add_executable(tetris ${TETRIS_SOURCES})
 
 target_link_libraries(tetris PRIVATE
     SDL3::SDL3
