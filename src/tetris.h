@@ -77,6 +77,7 @@ typedef struct {
 void InitTetrisContext(TetrisContext *context, Uint8 level, Uint8 startingBlocks);
 void UpdateGamePlay(TetrisContext *context);
 void MoveDown(TetrisContext *context);
+void HardDrop(TetrisContext *context);
 void MoveLeft(TetrisContext *context);
 void MoveRight(TetrisContext *context);
 void Rotate(TetrisContext *context);

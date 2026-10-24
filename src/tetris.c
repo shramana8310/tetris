@@ -46,21 +46,28 @@ void InitTetrisContext(TetrisContext *context, Uint8 level, Uint8 startingBlocks
 void UpdateGamePlay(TetrisContext *context)
 {
     Uint64 now = SDL_GetTicks();
-    while (now - context->lastTick >= context->mspt) {
-        if (!context->gameOver && !context->paused) {
-            if (context->moving) {
-                MoveDown(context);
-            } else {
-                SpawnNextTetromino(context);
-            }
-            UpdateTetrisContext(context);
+    if (context->gameOver || context->paused) {
+        while (now - context->lastTick >= context->mspt) {
+            context->lastTick += context->mspt;
         }
+        return;
+    }
+
+    if (!context->moving) {
+        SpawnNextTetromino(context);
+    }
+    while (now - context->lastTick >= context->mspt) {
+        MoveDown(context);
         context->lastTick += context->mspt;
     }
+    UpdateTetrisContext(context);
 }
 
 void MoveDown(TetrisContext *context)
 {
+    if (context->gameOver || context->paused) {
+        return;
+    }
     int i;
     Coordinate coordinate;
     for (i = 0; i < NO_BLOCKS_PER_TETROMINO; ++i) {
@@ -83,8 +90,27 @@ void MoveDown(TetrisContext *context)
     }
 }
 
+void HardDrop(TetrisContext *context)
+{
+    if (context->gameOver || context->paused) {
+        return;
+    }
+    int i;
+    Coordinate coordinate;
+    context->current = GetLandingTetromino(context);
+    context->moving = false;
+    for (i = 0; i < NO_BLOCKS_PER_TETROMINO; ++i) {
+        coordinate = context->current.coordinates[i];
+        context->board[coordinate.row][coordinate.col] = context->current.color;
+    }
+    IncrementScore(context, SCORE_PER_FIX);
+}
+
 void MoveLeft(TetrisContext *context)
 {
+    if (context->gameOver || context->paused) {
+        return;
+    }
     int i;
     Coordinate coordinate;
     for (i = 0; i < NO_BLOCKS_PER_TETROMINO; ++i) {
@@ -101,6 +127,9 @@ void MoveLeft(TetrisContext *context)
 
 void MoveRight(TetrisContext *context)
 {
+    if (context->gameOver || context->paused) {
+        return;
+    }
     int i;
     Coordinate coordinate;
     for (i = 0; i < NO_BLOCKS_PER_TETROMINO; ++i) {
@@ -117,6 +146,9 @@ void MoveRight(TetrisContext *context)
 
 void Rotate(TetrisContext *context)
 {
+    if (context->gameOver || context->paused) {
+        return;
+    }
     int i;
     Tetromino after;
     after = RotateTetromino(context->current);
@@ -138,6 +170,9 @@ void Rotate(TetrisContext *context)
 
 void TogglePause(TetrisContext *context)
 {
+    if (context->gameOver) {
+        return;
+    }
     context->paused = !context->paused;
 }
 

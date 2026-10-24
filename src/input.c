@@ -2,10 +2,10 @@
 #include "state.h"
 #include "tetris.h"
 
-void HandleKeyDownInSettings(GameState *gamestate, SDL_Keycode keycode)
+void HandleKeyDownInSettings(GameState *gamestate, SDL_Event *event)
 {
     TetrisContext *tetrisContext = gamestate->tetrisContext;
-    switch (keycode) {
+    switch (event->key.key) {
         case SDLK_RIGHT:
             IncrementStartingBlocks(tetrisContext);
             break;
@@ -25,23 +25,28 @@ void HandleKeyDownInSettings(GameState *gamestate, SDL_Keycode keycode)
     }
 }
 
-void HandleKeyDownInGamePlay(GameState *gamestate, SDL_Keycode keycode)
+void HandleKeyDownInGamePlay(GameState *gamestate, SDL_Event *event)
 {
     TetrisContext *tetrisContext = gamestate->tetrisContext;
-    if (keycode == SDLK_P) {
+    if (tetrisContext->gameOver) {
+        switch (event->key.key) {
+            case SDLK_SPACE:
+                InitTetrisContext(tetrisContext, tetrisContext->level, tetrisContext->startingBlocks);
+                break;
+            case SDLK_ESCAPE:
+                gamestate->mode = MODE_SETTINGS;
+                break;
+        }
+        return;
+    }
+    if (event->key.key == SDLK_ESCAPE) {
         TogglePause(tetrisContext);
         return;
     }
     if (tetrisContext->paused) {
         return;
     }
-    switch (keycode) {
-        case SDLK_I:
-            gamestate->mode = MODE_SETTINGS;
-            break;
-        case SDLK_R:
-            InitTetrisContext(tetrisContext, tetrisContext->level, tetrisContext->startingBlocks);
-            break;
+    switch (event->key.key) {
         case SDLK_LEFT:
             MoveLeft(tetrisContext);
             break;
@@ -56,17 +61,22 @@ void HandleKeyDownInGamePlay(GameState *gamestate, SDL_Keycode keycode)
         case SDLK_UP:
             Rotate(tetrisContext);
             break;
+        case SDLK_SPACE:
+            if (!event->key.repeat) {
+                HardDrop(tetrisContext);
+            }
+            break;
     }
 }
 
-SDL_AppResult HandleKeyDown(GameState *gamestate, SDL_Keycode keycode)
+SDL_AppResult HandleKeyDown(GameState *gamestate, SDL_Event *event)
 {
     switch (gamestate->mode) {
         case MODE_SETTINGS:
-            HandleKeyDownInSettings(gamestate, keycode);
+            HandleKeyDownInSettings(gamestate, event);
             break;
         case MODE_GAMEPLAY:
-            HandleKeyDownInGamePlay(gamestate, keycode);
+            HandleKeyDownInGamePlay(gamestate, event);
             break;
         default:
             break;
