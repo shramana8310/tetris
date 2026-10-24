@@ -248,7 +248,7 @@ void DrawBoard(RenderContext *renderContext, TetrisContext *tetrisContext)
     char text[64];
     SDL_snprintf(text, sizeof(text), "LEVEL  %d", tetrisContext->level);
     DrawText(renderContext, text, x_offset, info_y);
-    SDL_snprintf(text, sizeof(text), "SCORE  %d", tetrisContext->score);
+    SDL_snprintf(text, sizeof(text), "SCORE  %" SDL_PRIu32, tetrisContext->score);
     DrawText(renderContext, text, x_offset, info_y + 30);
     if (tetrisContext->paused) {
         DrawText(renderContext, "PAUSED", x_offset, info_y + 60);
@@ -270,7 +270,7 @@ void DrawSettingsScreen(RenderContext *renderContext, TetrisContext *tetrisConte
     DrawText(renderContext, "TETRIS", 30, 30);
     DrawText(renderContext, "LEVEL", 30, 80);
     char text[64];
-    SDL_snprintf(text, sizeof(text), "%d", tetrisContext->level);
+    SDL_snprintf(text, sizeof(text), "%d", tetrisContext->startingLevel);
     DrawText(renderContext, text, 30, 110);
     DrawText(renderContext, "STARTING BLOCKS", 30, 160);
     SDL_snprintf(text, sizeof(text), "%d", tetrisContext->startingBlocks);

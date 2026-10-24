@@ -67,14 +67,15 @@ typedef struct {
     bool moving;
     Uint64 lastTick;
     Uint8 level;
+    Uint8 startingLevel;
     Uint8 startingBlocks;
     Uint16 mspt;
-    Uint16 score;
+    Uint32 score;
     bool gameOver;
     bool paused;
 } TetrisContext;
 
-void InitTetrisContext(TetrisContext *context, Uint8 level, Uint8 startingBlocks);
+void InitTetrisContext(TetrisContext *context, Uint8 startingLevel, Uint8 startingBlocks);
 void UpdateGamePlay(TetrisContext *context);
 void MoveDown(TetrisContext *context);
 void HardDrop(TetrisContext *context);
@@ -84,8 +85,8 @@ void Rotate(TetrisContext *context);
 void TogglePause(TetrisContext *context);
 void IncrementStartingBlocks(TetrisContext *context);
 void DecrementStartingBlocks(TetrisContext *context);
-void IncrementLevel(TetrisContext *context);
-void DecrementLevel(TetrisContext *context);
+void IncrementStartingLevel(TetrisContext *context);
+void DecrementStartingLevel(TetrisContext *context);
 
 Tetromino CreateTetrominoByType(TetrominoType tetrominoType);
 Tetromino GetLandingTetromino(TetrisContext *context);

@@ -11,11 +11,12 @@ bool CanPlaceTetromino(TetrisContext *context, Tetromino tetromino);
 void GetWallKickPairs(TetrominoType type, Orientation orientation, struct Pair pairs[WALL_KICK_PAIR_SIZE]);
 int GetRowsToClear(TetrisContext *context, int r);
 void ClearRows(TetrisContext *context, int r, int n);
+void LockCurrentTetromino(TetrisContext *context);
 Uint16 LevelToMSPT(Uint8 level);
 void IncrementScore(TetrisContext *context, int d);
-void UpdateTetrisContext(TetrisContext *context);
+void ClearCompletedRows(TetrisContext *context);
 
-void InitTetrisContext(TetrisContext *context, Uint8 level, Uint8 startingBlocks)
+void InitTetrisContext(TetrisContext *context, Uint8 startingLevel, Uint8 startingBlocks)
 {
     int i, r, c;
     for (r = 0; r < BOARD_ROWS; ++r) {
@@ -33,40 +34,42 @@ void InitTetrisContext(TetrisContext *context, Uint8 level, Uint8 startingBlocks
         context->board[r][c] = BLOCK_GRAY;
         ++i;
     }
-    context->next = SDL_rand(TETROMINO_COUNT);
-    SpawnNextTetromino(context);
+
     context->lastTick = SDL_GetTicks();
-    context->level = level;
+    context->level = startingLevel;
+    context->startingLevel = startingLevel;
     context->startingBlocks = startingBlocks;
-    context->mspt = LevelToMSPT(context->level);
+    context->mspt = LevelToMSPT(context->startingLevel);
     context->score = 0;
     context->gameOver = false;
     context->paused = false;
+    context->moving = false;
+    context->next = SDL_rand(TETROMINO_COUNT);
+    SpawnNextTetromino(context);
 }
 
 void UpdateGamePlay(TetrisContext *context)
 {
     Uint64 now = SDL_GetTicks();
     if (context->gameOver || context->paused) {
-        while (now - context->lastTick >= context->mspt) {
-            context->lastTick += context->mspt;
-        }
+        context->lastTick = now;
         return;
     }
-
     if (!context->moving) {
         SpawnNextTetromino(context);
     }
     while (now - context->lastTick >= context->mspt) {
         MoveDown(context);
         context->lastTick += context->mspt;
+        if (!context->moving) {
+            break;
+        }
     }
-    UpdateTetrisContext(context);
 }
 
 void MoveDown(TetrisContext *context)
 {
-    if (context->gameOver || context->paused) {
+    if (context->gameOver || context->paused || !context->moving) {
         return;
     }
     int i;
@@ -83,33 +86,24 @@ void MoveDown(TetrisContext *context)
             ++context->current.coordinates[i].row;
         }
     } else {
-        for (i = 0; i < NO_BLOCKS_PER_TETROMINO; ++i) {
-            coordinate = context->current.coordinates[i];
-            context->board[coordinate.row][coordinate.col] = context->current.color;
-        }
-        IncrementScore(context, SCORE_PER_FIX);
+        LockCurrentTetromino(context);
     }
 }
 
 void HardDrop(TetrisContext *context)
 {
-    if (context->gameOver || context->paused) {
+    if (context->gameOver || context->paused || !context->moving) {
         return;
     }
     int i;
     Coordinate coordinate;
     context->current = GetLandingTetromino(context);
-    context->moving = false;
-    for (i = 0; i < NO_BLOCKS_PER_TETROMINO; ++i) {
-        coordinate = context->current.coordinates[i];
-        context->board[coordinate.row][coordinate.col] = context->current.color;
-    }
-    IncrementScore(context, SCORE_PER_FIX);
+    LockCurrentTetromino(context);
 }
 
 void MoveLeft(TetrisContext *context)
 {
-    if (context->gameOver || context->paused) {
+    if (context->gameOver || context->paused || !context->moving) {
         return;
     }
     int i;
@@ -128,7 +122,7 @@ void MoveLeft(TetrisContext *context)
 
 void MoveRight(TetrisContext *context)
 {
-    if (context->gameOver || context->paused) {
+    if (context->gameOver || context->paused || !context->moving) {
         return;
     }
     int i;
@@ -147,7 +141,7 @@ void MoveRight(TetrisContext *context)
 
 void Rotate(TetrisContext *context)
 {
-    if (context->gameOver || context->paused) {
+    if (context->gameOver || context->paused || !context->moving) {
         return;
     }
     int i;
@@ -191,17 +185,17 @@ void DecrementStartingBlocks(TetrisContext *context)
     }
 }
 
-void IncrementLevel(TetrisContext *context)
+void IncrementStartingLevel(TetrisContext *context)
 {
-    if (context->level < LEVEL_MAX) {
-        context->level++;
+    if (context->startingLevel < LEVEL_MAX) {
+        context->startingLevel++;
     }
 }
 
-void DecrementLevel(TetrisContext *context)
+void DecrementStartingLevel(TetrisContext *context)
 {
-    if (context->level > LEVEL_MIN) {
-        context->level--;
+    if (context->startingLevel > LEVEL_MIN) {
+        context->startingLevel--;
     }
 }
 
@@ -297,29 +291,11 @@ Tetromino CreateTetrominoByType(TetrominoType tetrominoType)
 
 Tetromino GetLandingTetromino(TetrisContext *context)
 {
-    Tetromino tetromino;
-    int r, i;
-    bool found;
-    Coordinate coordinate;
-    tetromino = context->current;
-    found = false;
-    for (r = 1; r < BOARD_ROWS; ++r) {
-        for (i = 0; i < NO_BLOCKS_PER_TETROMINO; ++i) {
-            coordinate = tetromino.coordinates[i];
-            if (coordinate.row + r == BOARD_ROWS || 
-                context->board[coordinate.row + r][coordinate.col] != BLOCK_NONE) {
-                found = true;
-                break;
-            }
-        }
-        if (found) {
-            break;
-        }
+    Tetromino landing = context->current;
+    while (CanPlaceTetromino(context, ShiftTetromino(landing, 1, 0))) {
+        landing = ShiftTetromino(landing, 1, 0);
     }
-    for (i = 0; i < NO_BLOCKS_PER_TETROMINO; ++i) {
-        tetromino.coordinates[i].row += r-1;
-    }
-    return tetromino;
+    return landing;
 }
 
 void SpawnNextTetromino(TetrisContext *context)
@@ -830,6 +806,17 @@ void ClearRows(TetrisContext *context, int r, int n)
     }
 }
 
+void LockCurrentTetromino(TetrisContext *context)
+{
+    for (int i = 0; i < NO_BLOCKS_PER_TETROMINO; ++i) {
+        Coordinate p = context->current.coordinates[i];
+        context->board[p.row][p.col] = context->current.color;
+    }
+    context->moving = false;
+    IncrementScore(context, SCORE_PER_FIX);
+    ClearCompletedRows(context);
+}
+
 Uint16 LevelToMSPT(Uint8 level)
 {
     return SDL_max(1000 - (level * 100), MSPT_MIN);
@@ -844,11 +831,14 @@ void IncrementScore(TetrisContext *context, int d)
     }
 }
 
-void UpdateTetrisContext(TetrisContext *context)
+void ClearCompletedRows(TetrisContext *context)
 {
     int r, n;
     for (r = BOARD_ROWS - 1; r >= 0; --r) {
         n = GetRowsToClear(context, r);
+        if (n == 0) {
+            continue;
+        }
         ClearRows(context, r, n);
         IncrementScore(context, SCORE_PER_ROW * n);
     }
