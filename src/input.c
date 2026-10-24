@@ -32,7 +32,7 @@ void HandleKeyDownInGamePlay(GameState *gamestate, SDL_Event *event)
     if (tetrisContext->gameOver) {
         switch (event->key.key) {
             case SDLK_SPACE:
-                InitTetrisContext(tetrisContext, tetrisContext->level, tetrisContext->startingBlocks);
+                InitTetrisContext(tetrisContext, LEVEL_MIN, STARTING_BLOCKS_MIN);
                 break;
         }
         return;
