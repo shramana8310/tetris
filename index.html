@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -302,6 +303,51 @@
       letter-spacing: 0.04em;
     }
 
+    #touch-controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 14px 10px 18px;
+      border-top: 1px solid var(--border);
+      background: rgb(9 11 17 / 65%);
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    #touch-controls button {
+      display: grid;
+      place-items: center;
+      width: clamp(44px, 12vw, 60px);
+      height: clamp(48px, 13vw, 60px);
+      padding: 0;
+      border: 1px solid #51476f;
+      border-radius: 12px;
+      background: #202337;
+      color: var(--text);
+      font-size: 24px;
+      font-weight: 700;
+      line-height: 1;
+      touch-action: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    #touch-controls button:hover {
+      border-color: var(--accent);
+      background: #302849;
+      color: white;
+    }
+
+    #touch-controls button:active,
+    #touch-controls button.is-pressed {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #11101a;
+      transform: scale(0.95);
+    }
+
     @media (max-width: 600px) {
       body {
         padding: 22px 12px;
@@ -335,6 +381,11 @@
 
       .options {
         gap: 12px;
+      }
+
+      #touch-controls {
+        gap: 7px;
+        padding: 12px 6px 16px;
       }
     }
   </style>
@@ -378,6 +429,21 @@
           ></canvas>
         </div>
       </div>
+
+    <div id="touch-controls" aria-label="Touch controls">
+      <button type="button" data-action="left"
+              aria-label="Move left">◀</button>
+      <button type="button" data-action="down"
+              aria-label="Soft drop">▼</button>
+      <button type="button" data-action="right"
+              aria-label="Move right">▶</button>
+      <button type="button" data-action="rotate"
+              aria-label="Rotate clockwise">↻</button>
+      <button type="button" data-action="hard-drop"
+              aria-label="Hard drop">⇊</button>
+      <button type="button" data-action="pause"
+              aria-label="Pause">Ⅱ</button>
+    </div>
 
       <div class="loading">
         <progress value="0" max="100" id="progress" hidden></progress>
@@ -489,6 +555,73 @@
         );
       }
     };
+
+    const touchActionIds = {
+      left: 0,
+      down: 1,
+      right: 2,
+      rotate: 3,
+      "hard-drop": 4,
+      pause: 5
+    };
+
+    const repeatableActions = new Set(["left", "down", "right"]);
+
+    function sendTouchKey(action, pressed) {
+      if (typeof Module._PushTouchKey !== "function") {
+        console.warn("Touch input bridge is not available yet.");
+        return;
+      }
+
+      Module._PushTouchKey(touchActionIds[action], pressed ? 1 : 0);
+    }
+
+    document.querySelectorAll("#touch-controls button").forEach(button => {
+      const action = button.dataset.action;
+      let repeatDelay = null;
+      let repeatInterval = null;
+      let pressed = false;
+
+      function stopPress() {
+        if (!pressed) return;
+
+        pressed = false;
+        clearTimeout(repeatDelay);
+        clearInterval(repeatInterval);
+
+        repeatDelay = null;
+        repeatInterval = null;
+
+        button.classList.remove("is-pressed");
+        sendTouchKey(action, false);
+      }
+
+      button.addEventListener("pointerdown", event => {
+        event.preventDefault();
+
+        if (pressed) return;
+
+        pressed = true;
+        button.classList.add("is-pressed");
+        button.setPointerCapture(event.pointerId);
+
+        sendTouchKey(action, true);
+
+        if (repeatableActions.has(action)) {
+          repeatDelay = setTimeout(() => {
+            if (!pressed) return;
+
+            repeatInterval = setInterval(() => {
+              if (pressed) sendTouchKey(action, true);
+            }, 80);
+          }, 180);
+        }
+      });
+
+      button.addEventListener("pointerup", stopPress);
+      button.addEventListener("pointercancel", stopPress);
+      button.addEventListener("lostpointercapture", stopPress);
+    });
 
     setStatus('Downloading...');
 

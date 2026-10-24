@@ -4,44 +4,44 @@
   // "30.0.0" -> 300000
   function humanReadableVersionToPacked(str) {
     str = str.split('-')[0]; // Remove any trailing part from e.g. "12.53.3-alpha"
-    var vers = str.split('.').slice(0, 3);
+    let vers = str.split('.').slice(0, 3);
     while(vers.length < 3) vers.push('00');
     vers = vers.map((n, i, arr) => n.padStart(2, '0'));
     return vers.join('');
   }
   // 300000 -> "30.0.0"
-  var packedVersionToHumanReadable = n => [n / 10_000 | 0, (n / 100 | 0) % 100, n % 100].join('.');
+  const packedVersionToHumanReadable = n => [n / 10_000 | 0, (n / 100 | 0) % 100, n % 100].join('.');
 
-  var TARGET_NOT_SUPPORTED = 2147483647;
+  const TARGET_NOT_SUPPORTED = 2147483647;
 
   // Note: We use a typeof check here instead of optional chaining using
   // globalThis because older browsers might not have globalThis defined.
 
   // We skip the node version checking when running on Bun/Deno since the node
   // version they report doesn't seem to be useful.
-  if (typeof process !== 'undefined' && !process.versions?.bun && typeof Deno == "undefined") {
-    var currentNodeVersion = process.versions?.node ? humanReadableVersionToPacked(process.versions.node) : TARGET_NOT_SUPPORTED;
+  if (typeof process !== 'undefined' && !process.versions?.bun && typeof Deno === "undefined") {
+    const currentNodeVersion = process.versions?.node ? humanReadableVersionToPacked(process.versions.node) : TARGET_NOT_SUPPORTED;
     if (currentNodeVersion < 180300) {
       throw new Error(`This emscripten-generated code requires node v${ packedVersionToHumanReadable(180300) } (detected v${packedVersionToHumanReadable(currentNodeVersion)})`);
     }
   }
 
-  var userAgent = typeof navigator !== 'undefined' && navigator.userAgent;
+  const userAgent = typeof navigator !== 'undefined' && navigator.userAgent;
   if (!userAgent) {
     return;
   }
 
-  var currentSafariVersion = userAgent.includes("Safari/") && !userAgent.includes("Chrome/") && userAgent.match(/Version\/(\d+\.?\d*\.?\d*)/) ? humanReadableVersionToPacked(userAgent.match(/Version\/(\d+\.?\d*\.?\d*)/)[1]) : TARGET_NOT_SUPPORTED;
+  const currentSafariVersion = userAgent.includes("Safari/") && !userAgent.includes("Chrome/") && userAgent.match(/Version\/(\d+\.?\d*\.?\d*)/) ? humanReadableVersionToPacked(userAgent.match(/Version\/(\d+\.?\d*\.?\d*)/)[1]) : TARGET_NOT_SUPPORTED;
   if (currentSafariVersion < 150000) {
     throw new Error(`This emscripten-generated code requires Safari v${ packedVersionToHumanReadable(150000) } (detected v${currentSafariVersion})`);
   }
 
-  var currentFirefoxVersion = userAgent.match(/Firefox\/(\d+(?:\.\d+)?)/) ? parseFloat(userAgent.match(/Firefox\/(\d+(?:\.\d+)?)/)[1]) : TARGET_NOT_SUPPORTED;
+  const currentFirefoxVersion = userAgent.match(/Firefox\/(\d+(?:\.\d+)?)/) ? parseFloat(userAgent.match(/Firefox\/(\d+(?:\.\d+)?)/)[1]) : TARGET_NOT_SUPPORTED;
   if (currentFirefoxVersion < 79) {
     throw new Error(`This emscripten-generated code requires Firefox v79 (detected v${currentFirefoxVersion})`);
   }
 
-  var currentChromeVersion = userAgent.match(/Chrome\/(\d+(?:\.\d+)?)/) ? parseFloat(userAgent.match(/Chrome\/(\d+(?:\.\d+)?)/)[1]) : TARGET_NOT_SUPPORTED;
+  const currentChromeVersion = userAgent.match(/Chrome\/(\d+(?:\.\d+)?)/) ? parseFloat(userAgent.match(/Chrome\/(\d+(?:\.\d+)?)/)[1]) : TARGET_NOT_SUPPORTED;
   if (currentChromeVersion < 85) {
     throw new Error(`This emscripten-generated code requires Chrome v85 (detected v${currentChromeVersion})`);
   }
@@ -61,7 +61,7 @@
 // after the generated code, you will need to define   var Module = {};
 // before the code. Then that object will be used in the code, and you
 // can continue to use Module afterwards as well.
-var Module = typeof Module != 'undefined' ? Module : {};
+var Module = typeof Module !== 'undefined' ? Module : {};
 
 // Determine the runtime environment we are in. You can customize this by
 // setting the ENVIRONMENT setting at compile time (see settings.js).
@@ -76,14 +76,14 @@ var ENVIRONMENT_IS_SHELL = !ENVIRONMENT_IS_WEB && !ENVIRONMENT_IS_NODE && !ENVIR
 
 // --pre-jses are emitted after the Module integration code, so that they can
 // refer to Module (if they choose; they can also define Module)
-// include: /tmp/tmpbggd7d17.js
+// include: /tmp/tmpbx6n38ik.js
 
   if (!Module['expectedDataFileDownloads']) Module['expectedDataFileDownloads'] = 0;
   Module['expectedDataFileDownloads']++;
   (() => {
     // Do not attempt to redownload the virtual filesystem data when in a pthread or a Wasm Worker context.
-    var isPthread = typeof ENVIRONMENT_IS_PTHREAD != 'undefined' && ENVIRONMENT_IS_PTHREAD;
-    var isWasmWorker = typeof ENVIRONMENT_IS_WASM_WORKER != 'undefined' && ENVIRONMENT_IS_WASM_WORKER;
+    var isPthread = typeof ENVIRONMENT_IS_PTHREAD !== 'undefined' && ENVIRONMENT_IS_PTHREAD;
+    var isWasmWorker = typeof ENVIRONMENT_IS_WASM_WORKER !== 'undefined' && ENVIRONMENT_IS_WASM_WORKER;
     if (isPthread || isWasmWorker) return;
     var isNode = globalThis.process && globalThis.process.versions && globalThis.process.versions.node && globalThis.process.type != 'renderer';
     async function loadPackage(metadata) {
@@ -204,21 +204,21 @@ Module['FS_createPath']("/", "assets", true, true);
 
   })();
 
-// end include: /tmp/tmpbggd7d17.js
-// include: /tmp/tmp2g97yxlq.js
+// end include: /tmp/tmpbx6n38ik.js
+// include: /tmp/tmpucvdtzia.js
 
     // All the pre-js content up to here must remain later on, we need to run
     // it.
-    if ((typeof ENVIRONMENT_IS_WASM_WORKER != 'undefined' && ENVIRONMENT_IS_WASM_WORKER) || (typeof ENVIRONMENT_IS_PTHREAD != 'undefined' && ENVIRONMENT_IS_PTHREAD) || (typeof ENVIRONMENT_IS_AUDIO_WORKLET != 'undefined' && ENVIRONMENT_IS_AUDIO_WORKLET)) Module['preRun'] = [];
+    if ((typeof ENVIRONMENT_IS_WASM_WORKER !== 'undefined' && ENVIRONMENT_IS_WASM_WORKER) || (typeof ENVIRONMENT_IS_PTHREAD !== 'undefined' && ENVIRONMENT_IS_PTHREAD) || (typeof ENVIRONMENT_IS_AUDIO_WORKLET !== 'undefined' && ENVIRONMENT_IS_AUDIO_WORKLET)) Module['preRun'] = [];
     var necessaryPreJSTasks = Module['preRun'].slice();
-  // end include: /tmp/tmp2g97yxlq.js
-// include: /tmp/tmpwwjckdib.js
+  // end include: /tmp/tmpucvdtzia.js
+// include: /tmp/tmp58vvmgwn.js
 
     if (!Module['preRun']) throw 'Module.preRun should exist because file support used it; did a pre-js delete it?';
     necessaryPreJSTasks.forEach((task) => {
       if (Module['preRun'].indexOf(task) < 0) throw 'All preRun tasks that exist before user pre-js code should remain after; did you replace Module or modify Module.preRun?';
     });
-  // end include: /tmp/tmpwwjckdib.js
+  // end include: /tmp/tmp58vvmgwn.js
 
 
 var programArgs = [];
@@ -231,7 +231,7 @@ var quit_ = (status, toThrow) => {
 // before the page load. In non-MODULARIZE modes generate it here.
 var _scriptName = globalThis.document?.currentScript?.src;
 
-if (typeof __filename != 'undefined') { // Node
+if (typeof __filename !== 'undefined') { // Node
   _scriptName = __filename;
 } else
 if (ENVIRONMENT_IS_WORKER) {
@@ -273,7 +273,7 @@ readAsync = async (filename, binary = true) => {
   // See the comment in the `readBinary` function.
   filename = isFileURI(filename) ? new URL(filename) : filename;
   var ret = fs.readFileSync(filename, binary ? undefined : 'utf8');
-  assert(binary ? Buffer.isBuffer(ret) : typeof ret == 'string');
+  assert(binary ? Buffer.isBuffer(ret) : typeof ret === 'string');
   return ret;
 };
 // end include: node_shell_read.js
@@ -284,7 +284,7 @@ readAsync = async (filename, binary = true) => {
   programArgs = process.argv.slice(2);
 
   // MODULARIZE will export the module in the proper place outside, we don't need to export here
-  if (typeof module != 'undefined') {
+  if (typeof module !== 'undefined') {
     module['exports'] = Module;
   }
 
@@ -446,7 +446,7 @@ var runtimeDebug = true; // Switch to false at runtime to disable logging at the
 
 // Used by XXXXX_DEBUG settings to output debug messages.
 function dbg(...args) {
-  if (!runtimeDebug && typeof runtimeDebug != 'undefined') return;
+  if (!runtimeDebug && typeof runtimeDebug !== 'undefined') return;
   // TODO(sbc): Make this configurable somehow.  Its not always convenient for
   // logging to show up as warnings.
   console.warn(...args);
@@ -454,15 +454,15 @@ function dbg(...args) {
 
 // Endianness check
 (() => {
-  var h16 = new Int16Array(1);
-  var h8 = new Int8Array(h16.buffer);
+  const h16 = new Int16Array(1);
+  const h8 = new Int8Array(h16.buffer);
   h16[0] = 0x6373;
   if (h8[0] !== 0x73 || h8[1] !== 0x63) abort('Runtime error: expected the system to be little-endian! (Run with -sSUPPORT_BIG_ENDIAN to bypass)');
 })();
 
 function consumedModuleProp(prop) {
-  var value = Module[prop];
-  var msg = `Attempt to modify \`Module.${prop}\` after it has already been processed.  This can happen, for example, when code is injected via '--post-js' rather than '--pre-js'`;
+  let value = Module[prop];
+  const msg = `Attempt to modify \`Module.${prop}\` after it has already been processed.  This can happen, for example, when code is injected via '--post-js' rather than '--pre-js'`;
   if (Array.isArray(value)) {
     value = new Proxy(value, {
       set(target, key, val) {
@@ -546,11 +546,11 @@ function missingLibrarySymbol(sym) {
   hookGlobalSymbolAccess(sym, () => {
     // Can't `abort()` here because it would break code that does runtime
     // checks.  e.g. `if (typeof SDL === 'undefined')`.
-    var msg = `\`${sym}\` is a library symbol and not included by default; add it to your library.js __deps or to DEFAULT_LIBRARY_FUNCS_TO_INCLUDE on the command line`;
+    let msg = `\`${sym}\` is a library symbol and not included by default; add it to your library.js __deps or to DEFAULT_LIBRARY_FUNCS_TO_INCLUDE on the command line`;
     // DEFAULT_LIBRARY_FUNCS_TO_INCLUDE requires the name as it appears in
     // library.js, which means $name for a JS name with no prefix, or name
     // for a JS name like _name.
-    var librarySymbol = sym;
+    let librarySymbol = sym;
     if (!librarySymbol.startsWith('_')) {
       librarySymbol = '$' + sym;
     }
@@ -571,7 +571,7 @@ function unexportedRuntimeSymbol(sym) {
     Object.defineProperty(Module, sym, {
       configurable: true,
       get() {
-        var msg = `'${sym}' was not exported. add it to EXPORTED_RUNTIME_METHODS (see the Emscripten FAQ)`;
+        let msg = `'${sym}' was not exported. add it to EXPORTED_RUNTIME_METHODS (see the Emscripten FAQ)`;
         if (isExportedByForceFilesystem(sym)) {
           msg += '. Alternatively, forcing filesystem support (-sFORCE_FILESYSTEM) can export this for you';
         }
@@ -588,7 +588,7 @@ const stackCookie2 = 0x89BACDFE;
 
 // Initializes the stack cookie. Called at the startup of main and at the startup of each thread in pthreads mode.
 function writeStackCookie() {
-  var max = _emscripten_stack_get_end();
+  let max = _emscripten_stack_get_end();
   assert((max & 3) == 0);
   // If the stack ends at address zero we write our cookies 4 bytes into the
   // stack.  This prevents interference with SAFE_HEAP and ASAN which also
@@ -611,13 +611,13 @@ function u32ToHexString(num) {
 
 function checkStackCookie() {
   if (ABORT) return;
-  var max = _emscripten_stack_get_end();
+  let max = _emscripten_stack_get_end();
   // See writeStackCookie().
   if (max == 0) {
     max += 4;
   }
-  var val1 = HEAPU32[((max)>>2)];
-  var val2 = HEAPU32[(((max)+(4))>>2)];
+  const val1 = HEAPU32[((max)>>2)];
+  const val2 = HEAPU32[(((max)+(4))>>2)];
   if (val1 != stackCookie1 || val2 != stackCookie2) {
     abort(`Stack overflow! Stack cookie has been overwritten at ${ptrToString(max)}, expected hex dwords ${u32ToHexString(stackCookie2)} and ${u32ToHexString(stackCookie1)}, but received ${u32ToHexString(val2)} ${u32ToHexString(val1)}`);
   }
@@ -658,7 +658,7 @@ assert(globalThis.Int32Array && globalThis.Float64Array && Int32Array.prototype.
 function preRun() {
   var preRun = Module['preRun'];
   if (preRun) {
-    if (typeof preRun == 'function') preRun = [preRun];
+    if (typeof preRun === 'function') preRun = [preRun];
     onPreRuns.push(...preRun);
   }
   consumedModuleProp('preRun');
@@ -692,7 +692,7 @@ function postRun() {
 
   var postRun = Module['postRun'];
   if (postRun) {
-    if (typeof postRun == 'function') postRun = [postRun];
+    if (typeof postRun === 'function') postRun = [postRun];
     onPostRuns.push(...postRun);
   }
   consumedModuleProp('postRun');
@@ -723,18 +723,7 @@ function abort(what) {
   // a trap or not based on a hidden field within the object. So at the moment
   // we don't have a way of throwing a wasm trap from JS. TODO Make a JS API that
   // allows this in the wasm spec.
-
-  // Suppress closure compiler warning here. Closure compiler's builtin extern
-  // definition for WebAssembly.RuntimeError claims it takes no arguments even
-  // though it can.
-  // TODO(https://github.com/google/closure-compiler/pull/3913): Remove if/when upstream closure gets fixed.
-  /** @suppress {checkTypes} */
-  var e = new WebAssembly.RuntimeError(what);
-
-  // Throw the error whether or not MODULARIZE is set because abort is used
-  // in code paths apart from instantiation where an exception is expected
-  // to be thrown when abort is called.
-  throw e;
+  throw new WebAssembly.RuntimeError(what);
 }
 
 function createExportWrapper(name, func, nargs) {
@@ -1034,7 +1023,7 @@ resolve:(...args) => {
       for (var i = args.length - 1; i >= -1 && !resolvedAbsolute; i--) {
         var path = (i >= 0) ? args[i] : FS.cwd();
         // Skip empty and invalid entries
-        if (typeof path != 'string') {
+        if (typeof path !== 'string') {
           throw new TypeError('Arguments to path.resolve must be strings');
         } else if (!path) {
           return ''; // an invalid portion invalidates the whole thing
@@ -1427,7 +1416,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
   mount(mount) {
         return MEMFS.createNode(null, '/', 16895, 0);
       },
-  createNode(parent, name, mode, dev) {
+  createNode(parent, name, mode, dev = undefined) {
         if (FS.isBlkdev(mode) || FS.isFIFO(mode)) {
           // not supported
           throw new FS.ErrnoError(63);
@@ -1521,7 +1510,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
         // For small filesizes (<1MB), perform size*2 geometric increase, but for
         // large sizes, do a much more conservative size*1.125 increase to avoid
         // overshooting the allocation cap by a very large margin.
-        var CAPACITY_DOUBLING_MAX = 1024 * 1024;
+        const CAPACITY_DOUBLING_MAX = 1024 * 1024;
         newCapacity = Math.max(newCapacity, (prevCapacity * (prevCapacity < CAPACITY_DOUBLING_MAX ? 2.0 : 1.125)) >>> 0);
         if (prevCapacity) newCapacity = Math.max(newCapacity, 256); // At minimum allocate 256b for each file when expanding.
         var oldContents = MEMFS.getFileDataAsTypedArray(node);
@@ -1577,7 +1566,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
   lookup(parent, name) {
           throw new FS.ErrnoError(44);
         },
-  mknod(parent, name, mode, dev) {
+  mknod(parent, name, mode, dev = undefined) {
           return MEMFS.createNode(parent, name, mode, dev);
         },
   rename(old_node, new_dir, new_name) {
@@ -1585,14 +1574,11 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
           try {
             new_node = FS.lookupNode(new_dir, new_name);
           } catch (e) {}
-          if (new_node) {
-            if (FS.isDir(old_node.mode)) {
-              // if we're overwriting a directory at new_name, make sure it's empty.
-              for (var i in new_node.contents) {
-                throw new FS.ErrnoError(55);
-              }
+          if (new_node && FS.isDir(old_node.mode)) {
+            // if we're overwriting a directory at new_name, make sure it's empty.
+            for (var i in new_node.contents) {
+              throw new FS.ErrnoError(55);
             }
-            FS.hashRemoveNode(new_node);
           }
           // do the internal rewiring
           delete old_node.parent.contents[old_node.name];
@@ -1714,7 +1700,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
   };
   
   var FS_modeStringToFlags = (str) => {
-      if (typeof str != 'string') return str;
+      if (typeof str !== 'string') return str;
       var flagModes = {
         'r': 0,
         'r+': 2,
@@ -1724,14 +1710,14 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
         'a+': 1024 | 64 | 2,
       };
       var flags = flagModes[str];
-      if (typeof flags == 'undefined') {
+      if (typeof flags === 'undefined') {
         throw new Error(`Unknown file open mode: ${str}`);
       }
       return flags;
     };
   
   var FS_fileDataToTypedArray = (data) => {
-      if (typeof data == 'string') {
+      if (typeof data === 'string') {
         data = intArrayFromString(data, true);
       }
       if (!data.subarray) {
@@ -1765,7 +1751,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
    * @return {string}
    */
   var UTF8ToString = (ptr, maxBytesToRead, ignoreNul) => {
-      assert(typeof ptr == 'number', `UTF8ToString expects a number (got ${typeof ptr})`);
+      assert(typeof ptr === 'number', `UTF8ToString expects a number (got ${typeof ptr})`);
       return ptr ? UTF8ArrayToString(HEAPU8, ptr, maxBytesToRead, ignoreNul) : '';
     };
   
@@ -1985,7 +1971,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
   var preloadPlugins = [];
   var FS_handledByPreloadPlugin = async (byteArray, fullname) => {
       // Ensure plugins are ready.
-      if (typeof Browser != 'undefined') Browser.init();
+      if (typeof Browser !== 'undefined') Browser.init();
   
       for (var plugin of preloadPlugins) {
         if (plugin['canHandle'](fullname)) {
@@ -2006,7 +1992,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
   
       try {
         var byteArray = url;
-        if (typeof url == 'string') {
+        if (typeof url === 'string') {
           byteArray = await asyncLoad(url);
         }
   
@@ -2030,11 +2016,10 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
   },
   streams:[],
   nextInode:1,
-  nameTable:null,
+  nameTable:[],
   currentPath:"/",
   initialized:false,
   ignorePermissions:true,
-  filesystems:null,
   syncFSRequests:0,
   ErrnoError:class extends Error {
         name = 'ErrnoError';
@@ -2299,8 +2284,8 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
         // if we failed to find it in the cache, call into the VFS
         return FS.lookup(parent, name);
       },
-  createNode(parent, name, mode, rdev) {
-        assert(typeof parent == 'object')
+  createNode(parent, name, mode, rdev = undefined) {
+        assert(typeof parent === 'object')
         var node = new FS.FSNode(parent, name, mode, rdev);
   
         FS.hashAddNode(node);
@@ -2509,7 +2494,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
         return mounts;
       },
   syncfs(populate, callback) {
-        if (typeof populate == 'function') {
+        if (typeof populate === 'function') {
           callback = populate;
           populate = false;
         }
@@ -2552,7 +2537,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
         }
       },
   mount(type, opts, mountpoint) {
-        if (typeof type == 'string') {
+        if (typeof type === 'string') {
           // The filesystem was not included, and instead we have an error
           // message stored in the variable.
           throw type;
@@ -2699,7 +2684,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
         mode |= 16384;
         return FS.mknod(path, mode, 0);
       },
-  mkdirTree(path, mode) {
+  mkdirTree(path, mode = 0o777) {
         var dirs = path.split('/');
         var d = '';
         for (var dir of dirs) {
@@ -2713,8 +2698,8 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
           }
         }
       },
-  mkdev(path, mode, dev) {
-        if (typeof dev == 'undefined') {
+  mkdev(path, mode, dev = undefined) {
+        if (typeof dev === 'undefined') {
           dev = mode;
           mode = 0o666;
         }
@@ -2833,6 +2818,11 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
         // do the underlying fs rename
         try {
           old_dir.node_ops.rename(old_node, new_dir, new_name);
+          // The replaced node is stale now. Evict it only after the rename
+          // succeeded: backends like NODEFS report node.id as st_ino.
+          if (new_node) {
+            FS.hashRemoveNode(new_node);
+          }
           // update old node (we do this here to avoid each backend
           // needing to)
           old_node.parent = new_dir;
@@ -2903,7 +2893,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
         }
         return link.node_ops.readlink(link);
       },
-  stat(path, dontFollow) {
+  stat(path, dontFollow = false) {
         var lookup = FS.lookupPath(path, { follow: !dontFollow });
         var node = lookup.node;
         var getattr = FS.checkOpExists(node.node_ops.getattr, 63);
@@ -2921,16 +2911,16 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
   lstat(path) {
         return FS.stat(path, true);
       },
-  doChmod(stream, node, mode, dontFollow) {
+  doChmod(stream, node, mode, dontFollow = false) {
         FS.doSetAttr(stream, node, {
           mode: (mode & 4095) | (node.mode & ~4095),
           ctime: Date.now(),
           dontFollow
         });
       },
-  chmod(path, mode, dontFollow) {
+  chmod(path, mode, dontFollow = false) {
         var node;
-        if (typeof path == 'string') {
+        if (typeof path === 'string') {
           var lookup = FS.lookupPath(path, { follow: !dontFollow });
           node = lookup.node;
         } else {
@@ -2945,16 +2935,16 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
         var stream = FS.getStreamChecked(fd);
         FS.doChmod(stream, stream.node, mode, false);
       },
-  doChown(stream, node, dontFollow) {
+  doChown(stream, node, dontFollow = false) {
         FS.doSetAttr(stream, node, {
           timestamp: Date.now(),
           dontFollow
           // we ignore the uid / gid for now
         });
       },
-  chown(path, uid, gid, dontFollow) {
+  chown(path, uid, gid, dontFollow = false) {
         var node;
-        if (typeof path == 'string') {
+        if (typeof path === 'string') {
           var lookup = FS.lookupPath(path, { follow: !dontFollow });
           node = lookup.node;
         } else {
@@ -2990,7 +2980,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
           throw new FS.ErrnoError(28);
         }
         var node;
-        if (typeof path == 'string') {
+        if (typeof path === 'string') {
           var lookup = FS.lookupPath(path, { follow: true });
           node = lookup.node;
         } else {
@@ -3005,7 +2995,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
         }
         FS.doTruncate(stream, stream.node, len);
       },
-  utime(path, atime, mtime, dontFollow) {
+  utime(path, atime, mtime, dontFollow = false) {
         var lookup = FS.lookupPath(path, { follow: !dontFollow });
         FS.doSetAttr(null, lookup.node, {
           atime: atime,
@@ -3025,7 +3015,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
         }
         var node;
         var isDirPath;
-        if (typeof path == 'object') {
+        if (typeof path === 'object') {
           node = path;
         } else {
           isDirPath = path.endsWith('/');
@@ -3144,7 +3134,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
         stream.ungotten = [];
         return stream.position;
       },
-  read(stream, buffer, offset, length, position) {
+  read(stream, buffer, offset, length, position = undefined) {
         assert(offset >= 0);
         if (length < 0 || position < 0) {
           throw new FS.ErrnoError(28);
@@ -3161,7 +3151,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
         if (!stream.stream_ops.read) {
           throw new FS.ErrnoError(28);
         }
-        var seeking = typeof position != 'undefined';
+        var seeking = typeof position !== 'undefined';
         if (!seeking) {
           position = stream.position;
         } else if (!stream.seekable) {
@@ -3171,7 +3161,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
         if (!seeking) stream.position += bytesRead;
         return bytesRead;
       },
-  write(stream, buffer, offset, length, position, canOwn) {
+  write(stream, buffer, offset, length, position = undefined, canOwn = undefined) {
         assert(offset >= 0);
         assert(buffer.subarray, 'FS.write expects a TypedArray');
         if (length < 0 || position < 0) {
@@ -3193,7 +3183,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
           // seek to the end before writing in append mode
           FS.llseek(stream, 0, 2);
         }
-        var seeking = typeof position != 'undefined';
+        var seeking = typeof position !== 'undefined';
         if (!seeking) {
           position = stream.position;
         } else if (!stream.seekable) {
@@ -3386,19 +3376,15 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
         assert(stderr.fd === 2, `invalid handle for stderr (${stderr.fd})`);
       },
   staticInit() {
-        FS.nameTable = new Array(4096);
+        FS.nameTable.length = 4096;
   
         FS.mount(MEMFS, {}, '/');
   
         FS.createDefaultDirectories();
         FS.createDefaultDevices();
         FS.createSpecialDirectories();
-  
-        FS.filesystems = {
-          'MEMFS': MEMFS,
-        };
       },
-  init(input, output, error) {
+  init(input = undefined, output = undefined, error = undefined) {
         assert(!FS.initialized, 'FS.init was previously called. If you want to initialize later with custom parameters, remove any earlier calls (note that one is automatically added to the generated code)');
         FS.initialized = true;
   
@@ -3420,7 +3406,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
           }
         }
       },
-  analyzePath(path, dontResolveLastLink) {
+  analyzePath(path, dontResolveLastLink = false) {
         warnOnce('FS.analyzePath is deprecated; use FS.lookupPath or FS.stat instead');
         // operate from within the context of the symlink's target
         try {
@@ -3449,8 +3435,8 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
         };
         return ret;
       },
-  createPath(parent, path, canRead, canWrite) {
-        parent = typeof parent == 'string' ? parent : FS.getPath(parent);
+  createPath(parent, path, canRead = undefined, canWrite = undefined) {
+        parent = typeof parent === 'string' ? parent : FS.getPath(parent);
         var parts = path.split('/').reverse();
         while (parts.length) {
           var part = parts.pop();
@@ -3465,15 +3451,15 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
         }
         return current;
       },
-  createFile(parent, name, properties, canRead, canWrite) {
-        var path = PATH.join2(typeof parent == 'string' ? parent : FS.getPath(parent), name);
+  createFile(parent, name, properties, canRead = undefined, canWrite = undefined) {
+        var path = PATH.join2(typeof parent === 'string' ? parent : FS.getPath(parent), name);
         var mode = FS_getMode(canRead, canWrite);
         return FS.create(path, mode);
       },
-  createDataFile(parent, name, data, canRead, canWrite, canOwn) {
+  createDataFile(parent, name, data = undefined, canRead = undefined, canWrite = undefined, canOwn = undefined) {
         var path = name;
         if (parent) {
-          parent = typeof parent == 'string' ? parent : FS.getPath(parent);
+          parent = typeof parent === 'string' ? parent : FS.getPath(parent);
           path = name ? PATH.join2(parent, name) : parent;
         }
         var mode = FS_getMode(canRead, canWrite);
@@ -3488,8 +3474,8 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
           FS.chmod(node, mode);
         }
       },
-  createDevice(parent, name, input, output) {
-        var path = PATH.join2(typeof parent == 'string' ? parent : FS.getPath(parent), name);
+  createDevice(parent, name, input = undefined, output = undefined) {
+        var path = PATH.join2(typeof parent === 'string' ? parent : FS.getPath(parent), name);
         var mode = FS_getMode(!!input, !!output);
         FS.createDevice.major ??= 64;
         var dev = FS.makedev(FS.createDevice.major++, 0);
@@ -3554,7 +3540,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
           }
         }
       },
-  createLazyFile(parent, name, url, canRead, canWrite) {
+  createLazyFile(parent, name, url, canRead = undefined, canWrite = undefined) {
         // Lazy chunked Uint8Array (implements get and length from Uint8Array).
         // Actual getting is abstracted away for eventual reuse.
         class LazyUint8Array {
@@ -3614,10 +3600,10 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
               var start = chunkNum * chunkSize;
               var end = (chunkNum+1) * chunkSize - 1; // including this byte
               end = Math.min(end, datalength-1); // if datalength-1 is selected, this is the last block
-              if (typeof lazyArray.chunks[chunkNum] == 'undefined') {
+              if (typeof lazyArray.chunks[chunkNum] === 'undefined') {
                 lazyArray.chunks[chunkNum] = doXHR(start, end);
               }
-              if (typeof lazyArray.chunks[chunkNum] == 'undefined') abort('doXHR failed!');
+              if (typeof lazyArray.chunks[chunkNum] === 'undefined') abort('doXHR failed!');
               return lazyArray.chunks[chunkNum];
             });
   
@@ -3724,7 +3710,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
   var HEAP64;
   var SYSCALLS = {
   currentUmask:18,
-  calculateAt(dirfd, path, allowEmpty) {
+  calculateAt(dirfd, path, allowEmpty = false) {
         if (PATH.isAbs(path)) {
           return path;
         }
@@ -3754,17 +3740,15 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
         HEAP64[(((buf)+(24))>>3)] = BigInt(stat.size);
         HEAP32[(((buf)+(32))>>2)] = 4096;
         HEAP32[(((buf)+(36))>>2)] = stat.blocks;
-        // Prefer `*Ms` properties if available (e.g. from NODEFS / host `fs.Stats`)
-        // for sub-millisecond precision; fall back to Date#getTime for other filesystems.
-        var atime = stat.atimeMs ?? stat.atime.getTime();
-        var mtime = stat.mtimeMs ?? stat.mtime.getTime();
-        var ctime = stat.ctimeMs ?? stat.ctime.getTime();
+        var atime = stat.atime.getTime();
+        var mtime = stat.mtime.getTime();
+        var ctime = stat.ctime.getTime();
         HEAP64[(((buf)+(40))>>3)] = BigInt(Math.floor(atime / 1000));
-        HEAPU32[(((buf)+(48))>>2)] = Math.floor((atime % 1000) * 1_000_000);
+        HEAPU32[(((buf)+(48))>>2)] = (atime % 1000) * 1000 * 1000;
         HEAP64[(((buf)+(56))>>3)] = BigInt(Math.floor(mtime / 1000));
-        HEAPU32[(((buf)+(64))>>2)] = Math.floor((mtime % 1000) * 1_000_000);
+        HEAPU32[(((buf)+(64))>>2)] = (mtime % 1000) * 1000 * 1000;
         HEAP64[(((buf)+(72))>>3)] = BigInt(Math.floor(ctime / 1000));
-        HEAPU32[(((buf)+(80))>>2)] = Math.floor((ctime % 1000) * 1_000_000);
+        HEAPU32[(((buf)+(80))>>2)] = (ctime % 1000) * 1000 * 1000;
         HEAP64[(((buf)+(88))>>3)] = BigInt(stat.ino);
         return 0;
       },
@@ -3850,7 +3834,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
       }
       return -28;
     } catch (e) {
-    if (typeof FS == 'undefined' || !(e.name === 'ErrnoError')) throw e;
+    if (typeof FS === 'undefined' || !(e.name === 'ErrnoError')) throw e;
     return -e.errno;
   }
   }
@@ -3862,7 +3846,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
       var stream = SYSCALLS.getStreamFromFD(fd);
       return 0; // we can't do anything synchronously; the in-memory FS is already synced to
     } catch (e) {
-    if (typeof FS == 'undefined' || !(e.name === 'ErrnoError')) throw e;
+    if (typeof FS === 'undefined' || !(e.name === 'ErrnoError')) throw e;
     return -e.errno;
   }
   }
@@ -3873,7 +3857,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
   
       return SYSCALLS.writeStat(buf, FS.fstat(fd));
     } catch (e) {
-    if (typeof FS == 'undefined' || !(e.name === 'ErrnoError')) throw e;
+    if (typeof FS === 'undefined' || !(e.name === 'ErrnoError')) throw e;
     return -e.errno;
   }
   }
@@ -3974,7 +3958,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
         default: return -28; // not supported
       }
     } catch (e) {
-    if (typeof FS == 'undefined' || !(e.name === 'ErrnoError')) throw e;
+    if (typeof FS === 'undefined' || !(e.name === 'ErrnoError')) throw e;
     return -e.errno;
   }
   }
@@ -3986,7 +3970,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
       path = SYSCALLS.getStr(path);
       return SYSCALLS.writeStat(buf, FS.lstat(path));
     } catch (e) {
-    if (typeof FS == 'undefined' || !(e.name === 'ErrnoError')) throw e;
+    if (typeof FS === 'undefined' || !(e.name === 'ErrnoError')) throw e;
     return -e.errno;
   }
   }
@@ -4003,7 +3987,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
       path = SYSCALLS.calculateAt(dirfd, path, allowEmpty);
       return SYSCALLS.writeStat(buf, nofollow ? FS.lstat(path) : FS.stat(path));
     } catch (e) {
-    if (typeof FS == 'undefined' || !(e.name === 'ErrnoError')) throw e;
+    if (typeof FS === 'undefined' || !(e.name === 'ErrnoError')) throw e;
     return -e.errno;
   }
   }
@@ -4022,7 +4006,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
       }
       return FS.open(path, flags, mode).fd;
     } catch (e) {
-    if (typeof FS == 'undefined' || !(e.name === 'ErrnoError')) throw e;
+    if (typeof FS === 'undefined' || !(e.name === 'ErrnoError')) throw e;
     return -e.errno;
   }
   }
@@ -4034,7 +4018,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
       path = SYSCALLS.getStr(path);
       return SYSCALLS.writeStat(buf, FS.stat(path));
     } catch (e) {
-    if (typeof FS == 'undefined' || !(e.name === 'ErrnoError')) throw e;
+    if (typeof FS === 'undefined' || !(e.name === 'ErrnoError')) throw e;
     return -e.errno;
   }
   }
@@ -4074,7 +4058,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
       HEAPU32[((addr)>>2)] = ptr;
       return 0;
     } catch (e) {
-    if (typeof FS == 'undefined' || !(e.name === 'ErrnoError')) throw e;
+    if (typeof FS === 'undefined' || !(e.name === 'ErrnoError')) throw e;
     return -e.errno;
   }
   ;
@@ -4092,7 +4076,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
         SYSCALLS.doMsync(addr, stream, len, flags, offset);
       }
     } catch (e) {
-    if (typeof FS == 'undefined' || !(e.name === 'ErrnoError')) throw e;
+    if (typeof FS === 'undefined' || !(e.name === 'ErrnoError')) throw e;
     return -e.errno;
   }
   ;
@@ -4667,7 +4651,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
   
   
   var stringToUTF8 = (str, outPtr, maxBytesToWrite) => {
-      assert(typeof maxBytesToWrite == 'number', 'stringToUTF8 requires a third parameter that specifies the length of the output buffer');
+      assert(typeof maxBytesToWrite === 'number', 'stringToUTF8 requires a third parameter that specifies the length of the output buffer');
       return stringToUTF8Array(str, HEAPU8, outPtr, maxBytesToWrite);
     };
   
@@ -5044,8 +5028,6 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
   
   
   
-  
-  
   var Browser = {
   useWebGL:false,
   isFullscreen:false,
@@ -5123,7 +5105,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
               err(`warning: browser could not fully decode audio ${name}, trying slower base64 approach`);
               function encode64(data) {
                 var BASE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-                var PAD = '=';
+                const PAD = '=';
                 var ret = '';
                 var leftchar = 0;
                 var leftbits = 0;
@@ -5202,7 +5184,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
           // This check of existence of GL is here to satisfy Closure compiler, which yells if variable GL is referenced below but GL object is not
           // actually compiled in because application is not doing any GL operations. TODO: Ideally if GL is not being used, this function
           // Browser.createContext() should not even be emitted.
-          if (typeof GL != 'undefined') {
+          if (typeof GL !== 'undefined') {
             contextHandle = GL.createContext(canvas, contextAttributes);
             if (contextHandle) {
               ctx = GL.getContext(contextHandle).GLctx;
@@ -5215,7 +5197,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
         if (!ctx) return null;
   
         if (setInModule) {
-          if (!useWebGL) assert(typeof GLctx == 'undefined', 'cannot set in module if GLctx is used, but we are a non-GL context that would replace it');
+          if (!useWebGL) assert(typeof GLctx === 'undefined', 'cannot set in module if GLctx is used, but we are a non-GL context that would replace it');
           Module['ctx'] = ctx;
           if (useWebGL) GL.makeContextCurrent(contextHandle);
           Browser.useWebGL = useWebGL;
@@ -5230,8 +5212,8 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
   requestFullscreen(lockPointer, resizeCanvas) {
         Browser.lockPointer = lockPointer;
         Browser.resizeCanvas = resizeCanvas;
-        if (typeof Browser.lockPointer == 'undefined') Browser.lockPointer = true;
-        if (typeof Browser.resizeCanvas == 'undefined') Browser.resizeCanvas = false;
+        if (typeof Browser.lockPointer === 'undefined') Browser.lockPointer = true;
+        if (typeof Browser.resizeCanvas === 'undefined') Browser.resizeCanvas = false;
   
         var canvas = Browser.getCanvas();
         function fullscreenChange() {
@@ -5291,12 +5273,6 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
         CFS.apply(document, []);
         return true;
       },
-  safeSetTimeout(func, timeout) {
-        // Legacy function, this is used by the SDL2 port so we need to keep it
-        // around at least until that is updated.
-        // See https://github.com/libsdl-org/SDL/pull/6304
-        return safeSetTimeout(func, timeout);
-      },
   getMimetype(name) {
         return {
           'jpg': 'image/jpeg',
@@ -5307,9 +5283,6 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
           'wav': 'audio/wav',
           'mp3': 'audio/mpeg'
         }[name.slice(name.lastIndexOf('.')+1)];
-      },
-  getUserMedia(func) {
-        return navigator.mediaDevices.getUserMedia(func);
       },
   getMouseWheelDelta(event) {
         var delta = 0;
@@ -5422,13 +5395,11 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
         Browser.updateCanvasDimensions(canvas, width, height);
         if (!noUpdates) Browser.updateResizeListeners();
       },
-  windowedWidth:0,
-  windowedHeight:0,
   setFullscreenCanvasSize() {
         // check if SDL is available
-        if (typeof SDL != 'undefined') {
+        if (typeof SDL !== 'undefined') {
           var flags = HEAPU32[((SDL.screen)>>2)];
-          flags = flags | 0x00800000; // set SDL_FULLSCREEN flag
+          flags = flags | 8388608;
           HEAP32[((SDL.screen)>>2)] = flags;
         }
         Browser.updateCanvasDimensions(Browser.getCanvas());
@@ -5436,9 +5407,9 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
       },
   setWindowedCanvasSize() {
         // check if SDL is available
-        if (typeof SDL != 'undefined') {
+        if (typeof SDL !== 'undefined') {
           var flags = HEAPU32[((SDL.screen)>>2)];
-          flags = flags & ~0x00800000; // clear SDL_FULLSCREEN flag
+          flags = flags & ~8388608;
           HEAP32[((SDL.screen)>>2)] = flags;
         }
         Browser.updateCanvasDimensions(Browser.getCanvas());
@@ -5454,7 +5425,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
         }
         var w = wNative;
         var h = hNative;
-        if ((getFullscreenElement() === canvas.parentNode) && (typeof screen != 'undefined')) {
+        if ((getFullscreenElement() === canvas.parentNode) && (typeof screen !== 'undefined')) {
            var factor = Math.min(screen.width / w, screen.height / h);
            w = Math.round(w * factor);
            h = Math.round(h * factor);
@@ -5462,14 +5433,14 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
         if (Browser.resizeCanvas) {
           if (canvas.width  != w) canvas.width  = w;
           if (canvas.height != h) canvas.height = h;
-          if (typeof canvas.style != 'undefined') {
+          if (typeof canvas.style !== 'undefined') {
             canvas.style.removeProperty( 'width');
             canvas.style.removeProperty('height');
           }
         } else {
           if (canvas.width  != wNative) canvas.width  = wNative;
           if (canvas.height != hNative) canvas.height = hNative;
-          if (typeof canvas.style != 'undefined') {
+          if (typeof canvas.style !== 'undefined') {
             if (w != wNative || h != hNative) {
               canvas.style.setProperty( 'width', w + 'px', 'important');
               canvas.style.setProperty('height', h + 'px', 'important');
@@ -5652,7 +5623,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
         // version field in above check.
         if (!canvas.getContextSafariWebGL2Fixed) {
           canvas.getContextSafariWebGL2Fixed = canvas.getContext;
-          /** @type {function(this:HTMLCanvasElement, string, (Object|null)=): (Object|null)} */
+          /** @type {function(this:HTMLCanvasElement, string, (Object|null)=): (RenderingContext|null)} */
           function fixedGetContext(ver, attrs) {
             var gl = canvas.getContextSafariWebGL2Fixed(ver, attrs);
             return ((ver == 'webgl') == (gl instanceof WebGLRenderingContext)) ? gl : null;
@@ -5684,7 +5655,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
         // given a canvas without having to pass the parameters again.
         if (ctx.canvas) ctx.canvas.GLctxObject = context;
         GL.contexts[handle] = context;
-        if (typeof webGLContextAttributes.enableExtensionsByDefault == 'undefined' || webGLContextAttributes.enableExtensionsByDefault) {
+        if (typeof webGLContextAttributes.enableExtensionsByDefault === 'undefined' || webGLContextAttributes.enableExtensionsByDefault) {
           GL.initExtensions(context);
         }
   
@@ -5705,7 +5676,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
         if (GL.currentContext === GL.contexts[contextHandle]) {
           GL.currentContext = null;
         }
-        if (typeof JSEvents == 'object') {
+        if (typeof JSEvents === 'object') {
           // Release all JS event handlers on the DOM element that the GL context is
           // associated with since the context is now deleted.
           JSEvents.removeAllHandlersOnTarget(GL.contexts[contextHandle].GLctx.canvas);
@@ -5792,8 +5763,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
   var _emscripten_glBindVertexArray = (vao) => {
       GLctx.bindVertexArray(GL.vaos[vao]);
     };
-  var _glBindVertexArray = _emscripten_glBindVertexArray;
-  var _emscripten_glBindVertexArrayOES = _glBindVertexArray;
+  var _emscripten_glBindVertexArrayOES = _emscripten_glBindVertexArray;
 
   var _emscripten_glBlendColor = (x0, x1, x2, x3) => GLctx.blendColor(x0, x1, x2, x3);
 
@@ -5987,8 +5957,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
         GL.vaos[id] = null;
       }
     };
-  var _glDeleteVertexArrays = _emscripten_glDeleteVertexArrays;
-  var _emscripten_glDeleteVertexArraysOES = _glDeleteVertexArrays;
+  var _emscripten_glDeleteVertexArraysOES = _emscripten_glDeleteVertexArrays;
 
   var _emscripten_glDepthFunc = (x0) => GLctx.depthFunc(x0);
 
@@ -6018,8 +5987,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
   var _emscripten_glDrawArraysInstanced = (mode, first, count, primcount) => {
       GLctx.drawArraysInstanced(mode, first, count, primcount);
     };
-  var _glDrawArraysInstanced = _emscripten_glDrawArraysInstanced;
-  var _emscripten_glDrawArraysInstancedANGLE = _glDrawArraysInstanced;
+  var _emscripten_glDrawArraysInstancedANGLE = _emscripten_glDrawArraysInstanced;
 
   
   var tempFixedLengthArray = [];
@@ -6034,8 +6002,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
   
       GLctx.drawBuffers(bufArray);
     };
-  var _glDrawBuffers = _emscripten_glDrawBuffers;
-  var _emscripten_glDrawBuffersWEBGL = _glDrawBuffers;
+  var _emscripten_glDrawBuffersWEBGL = _emscripten_glDrawBuffers;
 
   
   var _emscripten_glDrawElements = (mode, count, type, indices) => {
@@ -6048,8 +6015,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
   var _emscripten_glDrawElementsInstanced = (mode, count, type, indices, primcount) => {
       GLctx.drawElementsInstanced(mode, count, type, indices, primcount);
     };
-  var _glDrawElementsInstanced = _emscripten_glDrawElementsInstanced;
-  var _emscripten_glDrawElementsInstancedANGLE = _glDrawElementsInstanced;
+  var _emscripten_glDrawElementsInstancedANGLE = _emscripten_glDrawElementsInstanced;
 
   var _emscripten_glEnable = (x0) => GLctx.enable(x0);
 
@@ -6118,8 +6084,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
       GL.genObject(n, arrays, 'createVertexArray', GL.vaos
         );
     };
-  var _glGenVertexArrays = _emscripten_glGenVertexArrays;
-  var _emscripten_glGenVertexArraysOES = _glGenVertexArrays;
+  var _emscripten_glGenVertexArraysOES = _emscripten_glGenVertexArrays;
 
   var _emscripten_glGenerateMipmap = (x0) => GLctx.generateMipmap(x0);
 
@@ -6400,7 +6365,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
         param = GLctx.disjointTimerQueryExt['getQueryObjectEXT'](query, pname);
       }
       var ret;
-      if (typeof param == 'boolean') {
+      if (typeof param === 'boolean') {
         ret = param ? 1 : 0;
       } else {
         ret = param;
@@ -6419,7 +6384,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
       var query = GL.queries[id];
       var param = GLctx.disjointTimerQueryExt['getQueryObjectEXT'](query, pname);
       var ret;
-      if (typeof param == 'boolean') {
+      if (typeof param === 'boolean') {
         ret = param ? 1 : 0;
       } else {
         ret = param;
@@ -6428,12 +6393,10 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
     };
 
   
-  var _glGetQueryObjecti64vEXT = _emscripten_glGetQueryObjecti64vEXT;
-  var _emscripten_glGetQueryObjectui64vEXT = _glGetQueryObjecti64vEXT;
+  var _emscripten_glGetQueryObjectui64vEXT = _emscripten_glGetQueryObjecti64vEXT;
 
   
-  var _glGetQueryObjectivEXT = _emscripten_glGetQueryObjectivEXT;
-  var _emscripten_glGetQueryObjectuivEXT = _glGetQueryObjectivEXT;
+  var _emscripten_glGetQueryObjectuivEXT = _emscripten_glGetQueryObjectivEXT;
 
   
   var _emscripten_glGetQueryivEXT = (target, pname, params) => {
@@ -6702,7 +6665,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
         // WebGLUniformLocation.
         // If an integer, we have not yet bound the location, so do it now. The
         // integer value specifies the array index we should bind to.
-        if (typeof webglLoc == 'number') {
+        if (typeof webglLoc === 'number') {
           program.uniformLocsById[location] = webglLoc = GLctx.getUniformLocation(program, program.uniformArrayNamesById[location] + (webglLoc > 0 ? `[${webglLoc}]` : ''));
         }
         // Else an already cached WebGLUniformLocation, return it.
@@ -6727,7 +6690,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
       program = GL.programs[program];
       webglPrepareUniformLocationsBeforeFirstUse(program);
       var data = GLctx.getUniform(program, webglGetProgramUniformLocation(program, location));
-      if (typeof data == 'number' || typeof data == 'boolean') {
+      if (typeof data === 'number' || typeof data === 'boolean') {
         switch (type) {
           case 0: HEAP32[((params)>>2)] = data; break;
           case 2: HEAPF32[((params)>>2)] = data; break;
@@ -6777,7 +6740,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
       var data = GLctx.getVertexAttrib(index, pname);
       if (pname == 0x889F/*VERTEX_ATTRIB_ARRAY_BUFFER_BINDING*/) {
         HEAP32[((params)>>2)] = data && data["name"];
-      } else if (typeof data == 'number' || typeof data == 'boolean') {
+      } else if (typeof data === 'number' || typeof data === 'boolean') {
         switch (type) {
           case 0: HEAP32[((params)>>2)] = data; break;
           case 2: HEAPF32[((params)>>2)] = data; break;
@@ -6862,8 +6825,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
       if (!vao) return 0;
       return GLctx.isVertexArray(vao);
     };
-  var _glIsVertexArray = _emscripten_glIsVertexArray;
-  var _emscripten_glIsVertexArrayOES = _glIsVertexArray;
+  var _emscripten_glIsVertexArrayOES = _emscripten_glIsVertexArray;
 
   var _emscripten_glLineWidth = (x0) => GLctx.lineWidth(x0);
 
@@ -7383,8 +7345,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
   var _emscripten_glVertexAttribDivisor = (index, divisor) => {
       GLctx.vertexAttribDivisor(index, divisor);
     };
-  var _glVertexAttribDivisor = _emscripten_glVertexAttribDivisor;
-  var _emscripten_glVertexAttribDivisorANGLE = _glVertexAttribDivisor;
+  var _emscripten_glVertexAttribDivisorANGLE = _emscripten_glVertexAttribDivisor;
 
   var _emscripten_glVertexAttribPointer = (index, size, type, normalized, stride, ptr) => {
       GLctx.vertexAttribPointer(index, size, type, !!normalized, stride, ptr);
@@ -7510,7 +7471,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
       return JSEvents.registerOrRemoveHandler(eventHandler);
     };
   var _emscripten_set_beforeunload_callback_on_thread = (userData, callbackfunc, targetThread) => {
-      if (typeof onbeforeunload == 'undefined') return -1;
+      if (typeof onbeforeunload === 'undefined') return -1;
       // beforeunload callback can only be registered on the main browser thread, because the page will go away immediately after returning from the handler,
       // and there is no time to start proxying it anywhere.
       if (targetThread !== 1) return -5;
@@ -7522,7 +7483,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
   
   
   var registerFocusEventCallback = (target, userData, useCapture, callbackfunc, eventTypeId, eventTypeString, targetThread) => {
-      var eventSize = 256;
+      const eventSize = 256;
       JSEvents.focusEvent ||= _malloc(eventSize);
   
       var focusEventHandlerFunc = (e) => {
@@ -7576,7 +7537,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
   
   
   var registerDeviceMotionEventCallback = (target, userData, useCapture, callbackfunc, eventTypeId, eventTypeString, targetThread) => {
-      var eventSize = 80;
+      const eventSize = 80;
       JSEvents.deviceMotionEvent ||= _malloc(eventSize);
   
       var deviceMotionEventHandlerFunc = (e) => {
@@ -7617,7 +7578,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
   
   
   var registerFullscreenChangeEventCallback = (target, userData, useCapture, callbackfunc, eventTypeId, eventTypeString, targetThread) => {
-      var eventSize = 276;
+      const eventSize = 276;
       JSEvents.fullscreenChangeEvent ||= _malloc(eventSize);
   
       var fullscreenChangeEventHandlerFunc = (e) => {
@@ -7655,7 +7616,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
   
   
   var registerGamepadEventCallback = (target, userData, useCapture, callbackfunc, eventTypeId, eventTypeString, targetThread) => {
-      var eventSize = 1240;
+      const eventSize = 1240;
       JSEvents.gamepadEvent ||= _malloc(eventSize);
   
       var gamepadEventHandlerFunc = (e) => {
@@ -7697,7 +7658,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
   
   
   var registerKeyEventCallback = (target, userData, useCapture, callbackfunc, eventTypeId, eventTypeString, targetThread) => {
-      var eventSize = 160;
+      const eventSize = 160;
       JSEvents.keyEvent ||= _malloc(eventSize);
   
       var keyEventHandlerFunc = (e) => {
@@ -7785,7 +7746,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
   
   
   var registerOrientationChangeEventCallback = (target, userData, useCapture, callbackfunc, eventTypeId, eventTypeString, targetThread) => {
-      var eventSize = 8;
+      const eventSize = 8;
       JSEvents.orientationChangeEvent ||= _malloc(eventSize);
   
       var orientationChangeEventHandlerFunc = (e) => {
@@ -7829,7 +7790,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
   
   
   var registerPointerlockChangeEventCallback = (target, userData, useCapture, callbackfunc, eventTypeId, eventTypeString, targetThread) => {
-      var eventSize = 257;
+      const eventSize = 257;
       JSEvents.pointerlockChangeEvent ||= _malloc(eventSize);
   
       var pointerlockChangeEventHandlerFunc = (e) => {
@@ -7866,7 +7827,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
   
   
   var registerUiEventCallback = (target, userData, useCapture, callbackfunc, eventTypeId, eventTypeString, targetThread) => {
-      var eventSize = 36;
+      const eventSize = 36;
       JSEvents.uiEvent ||= _malloc(eventSize);
   
       target = findEventTarget(target);
@@ -7925,7 +7886,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
   
   
   var registerVisibilityChangeEventCallback = (target, userData, useCapture, callbackfunc, eventTypeId, eventTypeString, targetThread) => {
-      var eventSize = 8;
+      const eventSize = 8;
       JSEvents.visibilityChangeEvent ||= _malloc(eventSize);
   
       var visibilityChangeEventHandlerFunc = (e) => {
@@ -7986,7 +7947,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
   
   
   var registerWheelEventCallback = (target, userData, useCapture, callbackfunc, eventTypeId, eventTypeString, targetThread) => {
-      var eventSize = 96;
+      const eventSize = 96;
       JSEvents.wheelEvent ||= _malloc(eventSize)
   
       // The DOM Level 3 events spec event 'wheel'
@@ -8016,7 +7977,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
   var _emscripten_set_wheel_callback_on_thread = (target, userData, useCapture, callbackfunc, targetThread) => {
       target = findEventTarget(target);
       if (!target) return -4;
-      if (typeof target.onwheel != 'undefined') {
+      if (typeof target.onwheel !== 'undefined') {
         return registerWheelEventCallback(target, userData, useCapture, callbackfunc, 9, 'wheel', targetThread);
       } else {
         return -1;
@@ -8082,10 +8043,12 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
     };
   var _emscripten_webgl_create_context = _emscripten_webgl_do_create_context;
 
-  var _emscripten_webgl_destroy_context = (contextHandle) => {
+  
+  var _emscripten_webgl_do_destroy_context = (contextHandle) => {
       if (GL.currentContext == contextHandle) GL.currentContext = 0;
       GL.deleteContext(contextHandle);
     };
+  var _emscripten_webgl_destroy_context = _emscripten_webgl_do_destroy_context;
 
   var _emscripten_webgl_make_context_current = (contextHandle) => {
       var success = GL.makeContextCurrent(contextHandle);
@@ -8160,7 +8123,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
       FS.close(stream);
       return 0;
     } catch (e) {
-    if (typeof FS == 'undefined' || !(e.name === 'ErrnoError')) throw e;
+    if (typeof FS === 'undefined' || !(e.name === 'ErrnoError')) throw e;
     return e.errno;
   }
   }
@@ -8189,7 +8152,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
         if (curr < 0) return -1;
         ret += curr;
         if (curr < len) break; // nothing more to read
-        if (typeof offset != 'undefined') {
+        if (typeof offset !== 'undefined') {
           offset += curr;
         }
       }
@@ -8205,7 +8168,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
       HEAPU32[((pnum)>>2)] = num;
       return 0;
     } catch (e) {
-    if (typeof FS == 'undefined' || !(e.name === 'ErrnoError')) throw e;
+    if (typeof FS === 'undefined' || !(e.name === 'ErrnoError')) throw e;
     return e.errno;
   }
   }
@@ -8226,7 +8189,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
       if (stream.getdents && !offset && whence === 0) stream.getdents = null; // reset readdir state
       return 0;
     } catch (e) {
-    if (typeof FS == 'undefined' || !(e.name === 'ErrnoError')) throw e;
+    if (typeof FS === 'undefined' || !(e.name === 'ErrnoError')) throw e;
     return e.errno;
   }
   ;
@@ -8268,7 +8231,7 @@ var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
       HEAPU32[((pnum)>>2)] = num;
       return 0;
     } catch (e) {
-    if (typeof FS == 'undefined' || !(e.name === 'ErrnoError')) throw e;
+    if (typeof FS === 'undefined' || !(e.name === 'ErrnoError')) throw e;
     return e.errno;
   }
   }
@@ -8418,24 +8381,24 @@ if (Module['printErr']) err = Module['printErr'];
   if (Module['thisProgram']) thisProgram = Module['thisProgram'];
 
   // Assertions on removed incoming Module JS APIs.
-  assert(typeof Module['memoryInitializerPrefixURL'] == 'undefined', 'Module.memoryInitializerPrefixURL option was removed, use Module.locateFile instead');
-  assert(typeof Module['pthreadMainPrefixURL'] == 'undefined', 'Module.pthreadMainPrefixURL option was removed, use Module.locateFile instead');
-  assert(typeof Module['cdInitializerPrefixURL'] == 'undefined', 'Module.cdInitializerPrefixURL option was removed, use Module.locateFile instead');
-  assert(typeof Module['filePackagePrefixURL'] == 'undefined', 'Module.filePackagePrefixURL option was removed, use Module.locateFile instead');
-  assert(typeof Module['read'] == 'undefined', 'Module.read option was removed');
-  assert(typeof Module['readAsync'] == 'undefined', 'Module.readAsync option was removed (modify readAsync in JS)');
-  assert(typeof Module['readBinary'] == 'undefined', 'Module.readBinary option was removed (modify readBinary in JS)');
-  assert(typeof Module['setWindowTitle'] == 'undefined', 'Module.setWindowTitle option was removed (modify emscripten_set_window_title in JS)');
-  assert(typeof Module['TOTAL_MEMORY'] == 'undefined', 'Module.TOTAL_MEMORY has been renamed Module.INITIAL_MEMORY');
-  assert(typeof Module['ENVIRONMENT'] == 'undefined', 'Module.ENVIRONMENT has been deprecated. To force the environment, use the ENVIRONMENT compile-time option (for example, -sENVIRONMENT=web or -sENVIRONMENT=node)');
-  assert(typeof Module['STACK_SIZE'] == 'undefined', 'STACK_SIZE can no longer be set at runtime.  Use -sSTACK_SIZE at link time')
+  assert(typeof Module['memoryInitializerPrefixURL'] === 'undefined', 'Module.memoryInitializerPrefixURL option was removed, use Module.locateFile instead');
+  assert(typeof Module['pthreadMainPrefixURL'] === 'undefined', 'Module.pthreadMainPrefixURL option was removed, use Module.locateFile instead');
+  assert(typeof Module['cdInitializerPrefixURL'] === 'undefined', 'Module.cdInitializerPrefixURL option was removed, use Module.locateFile instead');
+  assert(typeof Module['filePackagePrefixURL'] === 'undefined', 'Module.filePackagePrefixURL option was removed, use Module.locateFile instead');
+  assert(typeof Module['read'] === 'undefined', 'Module.read option was removed');
+  assert(typeof Module['readAsync'] === 'undefined', 'Module.readAsync option was removed (modify readAsync in JS)');
+  assert(typeof Module['readBinary'] === 'undefined', 'Module.readBinary option was removed (modify readBinary in JS)');
+  assert(typeof Module['setWindowTitle'] === 'undefined', 'Module.setWindowTitle option was removed (modify emscripten_set_window_title in JS)');
+  assert(typeof Module['TOTAL_MEMORY'] === 'undefined', 'Module.TOTAL_MEMORY has been renamed Module.INITIAL_MEMORY');
+  assert(typeof Module['ENVIRONMENT'] === 'undefined', 'Module.ENVIRONMENT has been deprecated. To force the environment, use the ENVIRONMENT compile-time option (for example, -sENVIRONMENT=web or -sENVIRONMENT=node)');
+  assert(typeof Module['STACK_SIZE'] === 'undefined', 'STACK_SIZE can no longer be set at runtime.  Use -sSTACK_SIZE at link time')
   // If memory is defined in wasm, the user can't provide it, or set INITIAL_MEMORY
-  assert(typeof Module['wasmMemory'] == 'undefined', 'Use of `wasmMemory` detected.  Use -sIMPORTED_MEMORY to define wasmMemory externally');
-  assert(typeof Module['INITIAL_MEMORY'] == 'undefined', 'Detected runtime INITIAL_MEMORY setting.  Use -sIMPORTED_MEMORY to define wasmMemory dynamically');
+  assert(typeof Module['wasmMemory'] === 'undefined', 'Use of `wasmMemory` detected.  Use -sIMPORTED_MEMORY to define wasmMemory externally');
+  assert(typeof Module['INITIAL_MEMORY'] === 'undefined', 'Detected runtime INITIAL_MEMORY setting.  Use -sIMPORTED_MEMORY to define wasmMemory dynamically');
 
   var preInit = Module['preInit'];
   if (preInit) {
-    if (typeof preInit == 'function') Module['preInit'] = preInit = [preInit];
+    if (typeof preInit === 'function') Module['preInit'] = preInit = [preInit];
     // Written as a loop so that preInit functions that themselves add more
     // preInit functions.  Is this actually needed?
     while (preInit.length > 0) {
@@ -8589,7 +8552,6 @@ missingLibrarySymbols.forEach(missingLibrarySymbol)
   'strError',
   'DNS',
   'Protocols',
-  'Sockets',
   'timers',
   'warnOnce',
   'readEmAsmArgsArray',
@@ -8676,14 +8638,11 @@ missingLibrarySymbols.forEach(missingLibrarySymbol)
   'randomFill',
   'safeSetTimeout',
   'emSetImmediate',
-  'emClearImmediate_deps',
   'emClearImmediate',
   'promiseMap',
   'Browser',
   'setCanvasSize',
-  'getUserMedia',
   'createContext',
-  'getPreloadedImageData__data',
   'wget',
   'MONTH_DAYS_REGULAR',
   'MONTH_DAYS_LEAP',
@@ -8708,7 +8667,6 @@ missingLibrarySymbols.forEach(missingLibrarySymbol)
   'FS_currentPath',
   'FS_initialized',
   'FS_ignorePermissions',
-  'FS_filesystems',
   'FS_syncFSRequests',
   'FS_lookupPath',
   'FS_getPath',
@@ -8958,6 +8916,7 @@ var ASM_CONSTS = {
 var _SDL_free = Module['_SDL_free'] = makeInvalidEarlyAccess('_SDL_free');
 var _SDL_malloc = Module['_SDL_malloc'] = makeInvalidEarlyAccess('_SDL_malloc');
 var _main = Module['_main'] = makeInvalidEarlyAccess('_main');
+var _PushTouchKey = Module['_PushTouchKey'] = makeInvalidEarlyAccess('_PushTouchKey');
 var _SDL_calloc = Module['_SDL_calloc'] = makeInvalidEarlyAccess('_SDL_calloc');
 var _Emscripten_force_free = Module['_Emscripten_force_free'] = makeInvalidEarlyAccess('_Emscripten_force_free');
 var _SDL_realloc = Module['_SDL_realloc'] = makeInvalidEarlyAccess('_SDL_realloc');
@@ -8993,43 +8952,45 @@ var wasmMemory = makeInvalidEarlyAccess('wasmMemory');
 var wasmTable = makeInvalidEarlyAccess('wasmTable');
 
 function assignWasmExports(wasmExports) {
-  assert(typeof wasmExports['SDL_free'] != 'undefined', 'missing Wasm export: SDL_free');
-  assert(typeof wasmExports['SDL_malloc'] != 'undefined', 'missing Wasm export: SDL_malloc');
-  assert(typeof wasmExports['__main_argc_argv'] != 'undefined', 'missing Wasm export: __main_argc_argv');
-  assert(typeof wasmExports['SDL_calloc'] != 'undefined', 'missing Wasm export: SDL_calloc');
-  assert(typeof wasmExports['Emscripten_force_free'] != 'undefined', 'missing Wasm export: Emscripten_force_free');
-  assert(typeof wasmExports['SDL_realloc'] != 'undefined', 'missing Wasm export: SDL_realloc');
-  assert(typeof wasmExports['strerror'] != 'undefined', 'missing Wasm export: strerror');
-  assert(typeof wasmExports['fflush'] != 'undefined', 'missing Wasm export: fflush');
-  assert(typeof wasmExports['malloc'] != 'undefined', 'missing Wasm export: malloc');
-  assert(typeof wasmExports['CallSDLEmscriptenMainFunction'] != 'undefined', 'missing Wasm export: CallSDLEmscriptenMainFunction');
-  assert(typeof wasmExports['SDLEmscriptenCameraPermissionOutcome'] != 'undefined', 'missing Wasm export: SDLEmscriptenCameraPermissionOutcome');
-  assert(typeof wasmExports['SDLEmscriptenThreadIterate'] != 'undefined', 'missing Wasm export: SDLEmscriptenThreadIterate');
-  assert(typeof wasmExports['Emscripten_HandlePointerEnter'] != 'undefined', 'missing Wasm export: Emscripten_HandlePointerEnter');
-  assert(typeof wasmExports['Emscripten_HandlePointerLeave'] != 'undefined', 'missing Wasm export: Emscripten_HandlePointerLeave');
-  assert(typeof wasmExports['Emscripten_HandlePointerGeneric'] != 'undefined', 'missing Wasm export: Emscripten_HandlePointerGeneric');
-  assert(typeof wasmExports['Emscripten_HandleMouseButtonUpGlobal'] != 'undefined', 'missing Wasm export: Emscripten_HandleMouseButtonUpGlobal');
-  assert(typeof wasmExports['Emscripten_SendDragEvent'] != 'undefined', 'missing Wasm export: Emscripten_SendDragEvent');
-  assert(typeof wasmExports['Emscripten_SendDragCompleteEvent'] != 'undefined', 'missing Wasm export: Emscripten_SendDragCompleteEvent');
-  assert(typeof wasmExports['Emscripten_SendDragTextEvent'] != 'undefined', 'missing Wasm export: Emscripten_SendDragTextEvent');
-  assert(typeof wasmExports['Emscripten_SendDragFileEvent'] != 'undefined', 'missing Wasm export: Emscripten_SendDragFileEvent');
-  assert(typeof wasmExports['Emscripten_HandleLockKeysCheck'] != 'undefined', 'missing Wasm export: Emscripten_HandleLockKeysCheck');
-  assert(typeof wasmExports['Emscripten_SendSystemThemeChangedEvent'] != 'undefined', 'missing Wasm export: Emscripten_SendSystemThemeChangedEvent');
-  assert(typeof wasmExports['requestFullscreenThroughSDL'] != 'undefined', 'missing Wasm export: requestFullscreenThroughSDL');
-  assert(typeof wasmExports['emscripten_builtin_memalign'] != 'undefined', 'missing Wasm export: emscripten_builtin_memalign');
-  assert(typeof wasmExports['emscripten_stack_get_end'] != 'undefined', 'missing Wasm export: emscripten_stack_get_end');
-  assert(typeof wasmExports['emscripten_stack_get_base'] != 'undefined', 'missing Wasm export: emscripten_stack_get_base');
-  assert(typeof wasmExports['setThrew'] != 'undefined', 'missing Wasm export: setThrew');
-  assert(typeof wasmExports['emscripten_stack_init'] != 'undefined', 'missing Wasm export: emscripten_stack_init');
-  assert(typeof wasmExports['emscripten_stack_get_free'] != 'undefined', 'missing Wasm export: emscripten_stack_get_free');
-  assert(typeof wasmExports['_emscripten_stack_restore'] != 'undefined', 'missing Wasm export: _emscripten_stack_restore');
-  assert(typeof wasmExports['_emscripten_stack_alloc'] != 'undefined', 'missing Wasm export: _emscripten_stack_alloc');
-  assert(typeof wasmExports['emscripten_stack_get_current'] != 'undefined', 'missing Wasm export: emscripten_stack_get_current');
-  assert(typeof wasmExports['memory'] != 'undefined', 'missing Wasm export: memory');
-  assert(typeof wasmExports['__indirect_function_table'] != 'undefined', 'missing Wasm export: __indirect_function_table');
+  assert(typeof wasmExports['SDL_free'] !== 'undefined', 'missing Wasm export: SDL_free');
+  assert(typeof wasmExports['SDL_malloc'] !== 'undefined', 'missing Wasm export: SDL_malloc');
+  assert(typeof wasmExports['__main_argc_argv'] !== 'undefined', 'missing Wasm export: __main_argc_argv');
+  assert(typeof wasmExports['PushTouchKey'] !== 'undefined', 'missing Wasm export: PushTouchKey');
+  assert(typeof wasmExports['SDL_calloc'] !== 'undefined', 'missing Wasm export: SDL_calloc');
+  assert(typeof wasmExports['Emscripten_force_free'] !== 'undefined', 'missing Wasm export: Emscripten_force_free');
+  assert(typeof wasmExports['SDL_realloc'] !== 'undefined', 'missing Wasm export: SDL_realloc');
+  assert(typeof wasmExports['strerror'] !== 'undefined', 'missing Wasm export: strerror');
+  assert(typeof wasmExports['fflush'] !== 'undefined', 'missing Wasm export: fflush');
+  assert(typeof wasmExports['malloc'] !== 'undefined', 'missing Wasm export: malloc');
+  assert(typeof wasmExports['CallSDLEmscriptenMainFunction'] !== 'undefined', 'missing Wasm export: CallSDLEmscriptenMainFunction');
+  assert(typeof wasmExports['SDLEmscriptenCameraPermissionOutcome'] !== 'undefined', 'missing Wasm export: SDLEmscriptenCameraPermissionOutcome');
+  assert(typeof wasmExports['SDLEmscriptenThreadIterate'] !== 'undefined', 'missing Wasm export: SDLEmscriptenThreadIterate');
+  assert(typeof wasmExports['Emscripten_HandlePointerEnter'] !== 'undefined', 'missing Wasm export: Emscripten_HandlePointerEnter');
+  assert(typeof wasmExports['Emscripten_HandlePointerLeave'] !== 'undefined', 'missing Wasm export: Emscripten_HandlePointerLeave');
+  assert(typeof wasmExports['Emscripten_HandlePointerGeneric'] !== 'undefined', 'missing Wasm export: Emscripten_HandlePointerGeneric');
+  assert(typeof wasmExports['Emscripten_HandleMouseButtonUpGlobal'] !== 'undefined', 'missing Wasm export: Emscripten_HandleMouseButtonUpGlobal');
+  assert(typeof wasmExports['Emscripten_SendDragEvent'] !== 'undefined', 'missing Wasm export: Emscripten_SendDragEvent');
+  assert(typeof wasmExports['Emscripten_SendDragCompleteEvent'] !== 'undefined', 'missing Wasm export: Emscripten_SendDragCompleteEvent');
+  assert(typeof wasmExports['Emscripten_SendDragTextEvent'] !== 'undefined', 'missing Wasm export: Emscripten_SendDragTextEvent');
+  assert(typeof wasmExports['Emscripten_SendDragFileEvent'] !== 'undefined', 'missing Wasm export: Emscripten_SendDragFileEvent');
+  assert(typeof wasmExports['Emscripten_HandleLockKeysCheck'] !== 'undefined', 'missing Wasm export: Emscripten_HandleLockKeysCheck');
+  assert(typeof wasmExports['Emscripten_SendSystemThemeChangedEvent'] !== 'undefined', 'missing Wasm export: Emscripten_SendSystemThemeChangedEvent');
+  assert(typeof wasmExports['requestFullscreenThroughSDL'] !== 'undefined', 'missing Wasm export: requestFullscreenThroughSDL');
+  assert(typeof wasmExports['emscripten_builtin_memalign'] !== 'undefined', 'missing Wasm export: emscripten_builtin_memalign');
+  assert(typeof wasmExports['emscripten_stack_get_end'] !== 'undefined', 'missing Wasm export: emscripten_stack_get_end');
+  assert(typeof wasmExports['emscripten_stack_get_base'] !== 'undefined', 'missing Wasm export: emscripten_stack_get_base');
+  assert(typeof wasmExports['setThrew'] !== 'undefined', 'missing Wasm export: setThrew');
+  assert(typeof wasmExports['emscripten_stack_init'] !== 'undefined', 'missing Wasm export: emscripten_stack_init');
+  assert(typeof wasmExports['emscripten_stack_get_free'] !== 'undefined', 'missing Wasm export: emscripten_stack_get_free');
+  assert(typeof wasmExports['_emscripten_stack_restore'] !== 'undefined', 'missing Wasm export: _emscripten_stack_restore');
+  assert(typeof wasmExports['_emscripten_stack_alloc'] !== 'undefined', 'missing Wasm export: _emscripten_stack_alloc');
+  assert(typeof wasmExports['emscripten_stack_get_current'] !== 'undefined', 'missing Wasm export: emscripten_stack_get_current');
+  assert(typeof wasmExports['memory'] !== 'undefined', 'missing Wasm export: memory');
+  assert(typeof wasmExports['__indirect_function_table'] !== 'undefined', 'missing Wasm export: __indirect_function_table');
   _SDL_free = Module['_SDL_free'] = createExportWrapper('SDL_free', wasmExports['SDL_free'], 1);
   _SDL_malloc = Module['_SDL_malloc'] = createExportWrapper('SDL_malloc', wasmExports['SDL_malloc'], 1);
   _main = Module['_main'] = createExportWrapper('__main_argc_argv', wasmExports['__main_argc_argv'], 2);
+  _PushTouchKey = Module['_PushTouchKey'] = createExportWrapper('PushTouchKey', wasmExports['PushTouchKey'], 2);
   _SDL_calloc = Module['_SDL_calloc'] = createExportWrapper('SDL_calloc', wasmExports['SDL_calloc'], 2);
   _Emscripten_force_free = Module['_Emscripten_force_free'] = createExportWrapper('Emscripten_force_free', wasmExports['Emscripten_force_free'], 1);
   _SDL_realloc = Module['_SDL_realloc'] = createExportWrapper('SDL_realloc', wasmExports['SDL_realloc'], 2);
