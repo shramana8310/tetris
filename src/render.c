@@ -1,5 +1,6 @@
 #include "render.h"
 #include "tetris.h"
+#include <SDL3/SDL.h>
 
 SDL_FColor ColorFromBlockColor(BlockColor color, float alpha)
 {

@@ -1,6 +1,7 @@
 #include "input.h"
 #include "state.h"
 #include "tetris.h"
+#include <SDL3/SDL.h>
 
 void HandleKeyDownInSettings(GameState *gamestate, SDL_Event *event)
 {
@@ -32,9 +33,6 @@ void HandleKeyDownInGamePlay(GameState *gamestate, SDL_Event *event)
         switch (event->key.key) {
             case SDLK_SPACE:
                 InitTetrisContext(tetrisContext, tetrisContext->level, tetrisContext->startingBlocks);
-                break;
-            case SDLK_ESCAPE:
-                gamestate->mode = MODE_SETTINGS;
                 break;
         }
         return;

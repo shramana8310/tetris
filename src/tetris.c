@@ -1,4 +1,5 @@
 #include "tetris.h"
+#include <SDL3/SDL.h>
 #define WALL_KICK_PAIR_SIZE 4
 
 struct Pair { int r; int c; };
