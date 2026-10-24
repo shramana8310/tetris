@@ -303,51 +303,6 @@
       letter-spacing: 0.04em;
     }
 
-    #touch-controls {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 10px;
-      padding: 14px 10px 18px;
-      border-top: 1px solid var(--border);
-      background: rgb(9 11 17 / 65%);
-      touch-action: none;
-      user-select: none;
-      -webkit-user-select: none;
-    }
-
-    #touch-controls button {
-      display: grid;
-      place-items: center;
-      width: clamp(44px, 12vw, 60px);
-      height: clamp(48px, 13vw, 60px);
-      padding: 0;
-      border: 1px solid #51476f;
-      border-radius: 12px;
-      background: #202337;
-      color: var(--text);
-      font-size: 24px;
-      font-weight: 700;
-      line-height: 1;
-      touch-action: none;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    #touch-controls button:hover {
-      border-color: var(--accent);
-      background: #302849;
-      color: white;
-    }
-
-    #touch-controls button:active,
-    #touch-controls button.is-pressed {
-      border-color: var(--accent);
-      background: var(--accent);
-      color: #11101a;
-      transform: scale(0.95);
-    }
-
     @media (max-width: 600px) {
       body {
         padding: 22px 12px;
@@ -382,10 +337,62 @@
       .options {
         gap: 12px;
       }
+    }
 
+    #touch-controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      width: 100%;
+      max-width: 420px;
+      margin: 12px auto 0;
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    .control-group {
+      display: grid;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .movement-controls {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      align-content: start;
+    }
+
+    .action-controls {
+      grid-template-columns: 1fr;
+    }
+
+    #touch-controls button {
+      min-width: 0;
+      min-height: 52px;
+      padding: 8px 4px;
+      border: 1px solid #505766;
+      border-radius: 12px;
+      background: #292f3b;
+      color: white;
+      font: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    #touch-controls button:active {
+      background: #475569;
+      transform: scale(0.96);
+    }
+
+    @media (max-width: 360px) {
       #touch-controls {
-        gap: 7px;
-        padding: 12px 6px 16px;
+        gap: 8px;
+      }
+
+      #touch-controls button {
+        font-size: 12px;
+        min-height: 48px;
       }
     }
   </style>
@@ -430,19 +437,18 @@
         </div>
       </div>
 
-    <div id="touch-controls" aria-label="Touch controls">
-      <button type="button" data-action="left"
-              aria-label="Move left">◀</button>
-      <button type="button" data-action="down"
-              aria-label="Soft drop">▼</button>
-      <button type="button" data-action="right"
-              aria-label="Move right">▶</button>
-      <button type="button" data-action="rotate"
-              aria-label="Rotate clockwise">↻</button>
-      <button type="button" data-action="hard-drop"
-              aria-label="Hard drop">⇊</button>
-      <button type="button" data-action="pause"
-              aria-label="Pause">Ⅱ</button>
+    <div id="touch-controls">
+      <div class="control-group movement-controls">
+        <button type="button" data-action="left" aria-label="Move left">◀</button>
+        <button type="button" data-action="down" aria-label="Move down">▼</button>
+        <button type="button" data-action="right" aria-label="Move right">▶</button>
+      </div>
+
+      <div class="control-group action-controls">
+        <button type="button" data-action="rotate">↻ Rotate</button>
+        <button type="button" data-action="hard-drop">⇊ Drop</button>
+        <button type="button" data-action="pause">Ⅱ Pause</button>
+      </div>
     </div>
 
       <div class="loading">
