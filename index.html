@@ -205,37 +205,6 @@
       display: none;
     }
 
-    .actions {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 12px;
-      padding: 14px 18px;
-      border-top: 1px solid var(--border);
-    }
-
-    .options {
-      display: flex;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 16px;
-    }
-
-    .option {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      color: var(--muted);
-      font-size: 12px;
-      cursor: pointer;
-    }
-
-    .option input {
-      accent-color: var(--accent);
-      cursor: pointer;
-    }
-
     button {
       padding: 9px 15px;
       border: 1px solid #6550ad;
@@ -326,16 +295,6 @@
 
       .stage {
         padding: 16px 8px;
-      }
-
-      .actions {
-        align-items: flex-start;
-        flex-direction: column;
-        padding: 14px 12px;
-      }
-
-      .options {
-        gap: 12px;
       }
     }
 
@@ -453,29 +412,6 @@
 
       <div class="loading">
         <progress value="0" max="100" id="progress" hidden></progress>
-      </div>
-
-      <div class="actions">
-        <div class="options">
-          <label class="option">
-            <input type="checkbox" id="resize">
-            Resize canvas
-          </label>
-          <label class="option">
-            <input type="checkbox" id="pointerLock" checked>
-            Lock mouse in fullscreen
-          </label>
-        </div>
-
-        <button
-          type="button"
-          onclick="Module.requestFullscreen(
-            document.getElementById('pointerLock').checked,
-            document.getElementById('resize').checked
-          )"
-        >
-          Fullscreen ↗
-        </button>
       </div>
     </section>
 
