@@ -59,7 +59,9 @@ void HandleKeyDownInGamePlay(GameState *gamestate, SDL_Event *event)
             }
             break;
         case SDLK_UP:
-            Rotate(tetrisContext);
+            if (!event->key.repeat) {
+                Rotate(tetrisContext);
+            }
             break;
         case SDLK_SPACE:
             if (!event->key.repeat) {
