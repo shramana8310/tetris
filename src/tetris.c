@@ -9,8 +9,6 @@ Tetromino RotateTetromino(Tetromino tetromino);
 Tetromino ShiftTetromino(Tetromino tetromino, int r, int c);
 bool CanPlaceTetromino(TetrisContext *context, Tetromino tetromino);
 void GetWallKickPairs(TetrominoType type, Orientation orientation, struct Pair pairs[WALL_KICK_PAIR_SIZE]);
-int GetRowsToClear(TetrisContext *context, int r);
-void ClearRows(TetrisContext *context, int r, int n);
 void LockCurrentTetromino(TetrisContext *context);
 Uint16 LevelToMSPT(Uint8 level);
 void IncrementScore(TetrisContext *context, int d);
@@ -18,6 +16,12 @@ void ClearCompletedRows(TetrisContext *context);
 
 void InitTetrisContext(TetrisContext *context, Uint8 startingLevel, Uint8 startingBlocks)
 {
+    if (context == NULL ||
+        startingLevel < LEVEL_MIN ||
+        startingLevel > LEVEL_MAX ||
+        startingBlocks > STARTING_BLOCKS_MAX) {
+        return;
+    }
     int i, r, c;
     for (r = 0; r < BOARD_ROWS; ++r) {
         for (c = 0; c < BOARD_COLS; ++c) {
@@ -781,31 +785,6 @@ Tetromino ShiftTetromino(Tetromino tetromino, int r, int c)
     return tetromino;
 }
 
-int GetRowsToClear(TetrisContext *context, int r)
-{
-    int c;
-    for (c = 0; c < BOARD_COLS; ++c) {
-        if (context->board[r][c] == BLOCK_NONE) {
-            return 0;
-        }
-    }
-    return r == 0 ? 1 : 1 + GetRowsToClear(context, r-1);
-}
-
-void ClearRows(TetrisContext *context, int r, int n)
-{
-    int c;
-    for ( ; r >= 0; --r) {
-        for (c = 0; c < BOARD_COLS; ++c) {
-            if (r - n >= 0) {
-                context->board[r][c] = context->board[r-n][c];
-            } else {
-                context->board[r][c] = BLOCK_NONE;
-            }
-        }
-    }
-}
-
 void LockCurrentTetromino(TetrisContext *context)
 {
     for (int i = 0; i < NO_BLOCKS_PER_TETROMINO; ++i) {
@@ -825,21 +804,46 @@ Uint16 LevelToMSPT(Uint8 level)
 void IncrementScore(TetrisContext *context, int d)
 {
     context->score += d;
-    if (context->score >= SCORE_PER_LEVEL * context->level) {
-        context->level = SDL_min(LEVEL_MAX, context->level+1);
-        context->mspt = LevelToMSPT(context->level);
+    while (context->level < LEVEL_MAX &&
+           context->score >= SCORE_PER_LEVEL * (context->level+1 - context->startingLevel)) {
+        ++context->level;
     }
+    context->mspt = LevelToMSPT(context->level);
 }
 
 void ClearCompletedRows(TetrisContext *context)
 {
-    int r, n;
-    for (r = BOARD_ROWS - 1; r >= 0; --r) {
-        n = GetRowsToClear(context, r);
-        if (n == 0) {
+    int read;
+    int write = BOARD_ROWS - 1;
+    int c;
+    int cleared = 0;
+    for (read = BOARD_ROWS - 1; read >= 0; --read) {
+        bool full = true;
+        for (c = 0; c < BOARD_COLS; ++c) {
+            if (context->board[read][c] == BLOCK_NONE) {
+                full = false;
+                break;
+            }
+        }
+        if (full) {
+            ++cleared;
             continue;
         }
-        ClearRows(context, r, n);
-        IncrementScore(context, SCORE_PER_ROW * n);
+        if (write != read) {
+            for (c = 0; c < BOARD_COLS; ++c) {
+                context->board[write][c] =
+                    context->board[read][c];
+            }
+        }
+        --write;
+    }
+    while (write >= 0) {
+        for (c = 0; c < BOARD_COLS; ++c) {
+            context->board[write][c] = BLOCK_NONE;
+        }
+        --write;
+    }
+    if (cleared > 0) {
+        IncrementScore(context, SCORE_PER_ROW * cleared);
     }
 }
